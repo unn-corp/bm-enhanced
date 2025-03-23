@@ -1,4 +1,4 @@
-const version = "1.11" // Changing this version is what causes updates. A higher number = update.
+const version = "1.12" // Changing this version is what causes updates. A higher number = update.
 const updateRate = "65" // ms Overall rate to run the code at.
 const bmORG_ID = "58064" // Used for ban shortcut, use the # ID in URL of your org's main ban filter on BM..
 const versionSource = "https://raw.githubusercontent.com/Synarious/bm-userscript/unnamed/bm-toolkit-desktop.min.js" // link to raw github article.
@@ -120,7 +120,6 @@ const colors = {
     cFactionGroup1: "#4eacff",
     cFactionGroup2: "#d0b1ff",
     cFactionGroup3: "#fd6aff",
-    cbmAdmin: "#b3ffac",
     cModAction: "#ff3333",
     cAdminAction: "#37ff00",
     cTeamKilled: "#ffcc00",
@@ -131,83 +130,12 @@ const colors = {
     cNoteColorIcon: "#f5ccff"
 }; // This is the color scheme for the script, change to your liking.
 
-// Bar Coloring Settings
-const navTools = {
-    changeMapWarning: [
-        {
-            phrase: "Change Layer",
-            styles: {
-                color: "red",
-                fontStyle: "bold",
-                textAlign: "center",
-                fontSize: "200pt",
-            },
-        },
-        {
-            phrase: "Set Next Layer",
-            styles: {
-                color: "lime",
-                fontStyle: "bold",
-                textAlign: "center",
-                fontSize: "24pt",
-            },
-        },
-        {
-            phrase: "Kick",
-            styles: {
-                color: "orange",
-                fontStyle: "bold",
-                textAlign: "center",
-                fontSize: "48pt",
-            },
-        },
-        {
-            phrase: "Warn",
-            styles: {
-                color: "lime",
-                fontStyle: "bold",
-                textAlign: "center",
-                fontSize: "24pt",
-            },
-        },
-    ],
-    orgGroup: [
-        { phrase: "Admin", styles: { background: "#537eff" } },
-        { phrase: "Reforger Admin", styles: { background: "#0ccb00" } },
-        { phrase: "Moderator", styles: { background: "#00acd0" } },
-        { phrase: "Squad", styles: { background: "#ffc900" } },
-        { phrase: "Appeal Team", styles: { background: "#c5081d" } },
-        { phrase: "Director", styles: { background: "black" } },
-        { phrase: "Recruiter", styles: { background: "#674ea7" } },
-    ], // put least the specific e.g "admin" at top, then "super admin" at bottom.
-    playerMenuDialog: [
-        { phrase: "Warn", styles: { color: "lime" } },
-        { phrase: "Squad List", styles: { color: "gold" } },
-        { phrase: "Kick", styles: { color: "orange" } },
-        { phrase: "Ban", styles: { color: "red" } },
-        { phrase: "Force Team Change", styles: { color: "#db4dff" } },
-        { phrase: "Remove Player from Squad", styles: { color: "#804d00" } },
-        { phrase: "Action - Reset Squad Name", styles: { color: "gold" } },
-    ],
-    serverCommands: [
-        { phrase: "Warn", styles: { color: "lime" } },
-        { phrase: "Kick", styles: { color: "orange" } },
-        { phrase: "Ban", styles: { color: "red" } },
-        { phrase: "Force Team Change", styles: { color: "#db4dff" } },
-        { phrase: "Remove Player from Squad", styles: { color: "#804d00" } },
-        { phrase: "Action - Reset Squad Name", styles: { color: "gold" } },
-        { phrase: "Next Layer", styles: { color: "lime", fontSize: "16pt" } },
-        { phrase: "Change Layer", styles: { color: "red", fontStyle: "bold", fontSize: "8pt" } },
-        { phrase: "Squad List", styles: { color: "gold", fontSize: "16pt" } },
-    ]
-};
 
 /*
 !
 ! Start of the code that runs the logic, do not change below unless you know what you're doing!
 !
 */
-// Function to get color from the mapping
 
 async function fetchAdminList() {
     try {
@@ -366,7 +294,7 @@ async function runCode() {
                         });
                     });
                 }
-                
+
 
                 // Apply colors based on phrases
                 applyColor(messageLog, sets.joinedServer, colors.cJoined);
@@ -387,13 +315,6 @@ async function runCode() {
                 adminApplyColor(namePlayers, sets.adminList2, colors.cStaffGroup2);
                 adminApplyColor(nameActivity, sets.adminList3, colors.cStaffGroup3);
                 adminApplyColor(namePlayers, sets.adminList3, colors.cStaffGroup3);
-
-                // Highlights the Player Is Admin to neon in the players bar.
-                bmAdmin.forEach((element) => {
-                    if (element.textContent.includes("Admin")) {
-                        element.style.color = colors.cbmAdmin;
-                    }
-                });
 
                 // Changes Flag Color For Note On Player List
                 bmNoteFlag.forEach((element) => {
@@ -614,27 +535,6 @@ async function runCode() {
                         });
                     });
                 };
-
-                setTimeout(() => {
-                    // Apply styles to specific elements based on content
-                    applyStyles(
-                        document.querySelectorAll(".modal-title"),
-                        navTools.changeMapWarning
-                    );
-                    applyStyles(document.querySelectorAll(".css-4ey69y"), navTools.orgGroup);
-                    applyStyles(
-                        document.querySelectorAll(".css-f5o5h6 a, .css-f5o5h6 button"),
-                        navTools.playerMenuDialog
-                    );
-                    applyStyles(
-                        document.querySelectorAll(".css-1ixz43s a, .css-1ixz43s button"),
-                        navTools.playerMenuDialog
-                    );
-                    applyStyles(
-                        document.querySelectorAll(".css-yun63y a, .css-yun63y button"),
-                        navTools.serverCommands
-                    );
-                }, 500)
 
             } colorDialogMenus();
         }
