@@ -1,5 +1,5 @@
 ## About This Repository
-This project is userscript that began as a way to improve the readability of logs in populated games like Squad. Initially designed to highlight text, it has grown to include over a dozen features and quality-of-life improvements. The project has been rewritten to be easily forked and is now available for free. Primarily a passion project, it has been tested in Squad/Reforger communities and should theoretically work for all Battlemetrics-supported titles.
+This project is a real-time Chrome extension and tampermonkey userscript for Battlemetrics.com. It was created as a passion project to help server admins to better moderate their communities and read the logs of active servers in games with dozens of online users.
 
 It's free and open source, please consider leaving a coffee https://ko-fi.com/synarion if you would like. 
 
@@ -14,29 +14,32 @@ Which is better? For chrome, the extension has reduced permission scope compared
 > [!WARNING]
 > Chromium browsers (Chrome, Edge, Brave etc..) all require "DEV MODE" enabled in the extension settings area (see "Getting Started" guide below).
 
-## Features Of bm-desktop-auto.min.js
----- All customizable! ----
-* Log highlighting for ban, warns and kicks and more.
-* Highlights terms involving admin with bright green.
-* Highlights those listed as "Admins" on BM.
-* Highlights the staff names. Displays both in activity and player list.
-* Auto updating (see important note on this below). 
-* Color coding ban server.
-* Sizing & layout improvements for bans, player look-up and flags.
-* "Mostly" working on iOS and Android devices. Assuming you have browser or injector app that supports userscript, there are a few.
-* Quick link buttons - access admin resources in one click.
-* [CommunityBanList](https://communitybanlist.com/) CBL auto lookup.
-* One Click Player Copy - Link, steamID and URL to your clipboard.
-* Grays out unimportant events like joins/leaves.
-* Color codes server actions, to prevent accidental map changes etc..
-* Adds time in seconds to timestamp (when hovering over the tooltip) (LiQ Avengerian)
-* Color coded groups, such as for player teams/factions in a game. US vs. RUS etc..
+## Features Of This Project
+------- For Users -------
+* Highlight words within the log, based on phrases to help easily moderate.
+* Access time in seconds (when hovering on the time) to know the exact second things occur. 
+* Highlights admins with 3 different possible colors, knowing if admin is online easily.
+* Faster ban viewing, automatically go to your ORG bans instead of "unsorted". 
+* Copy/Paste button when viewing player profiles, copy all data at once.
+* [CommunityBanList](https://communitybanlist.com/) CBL auto lookup for SteamIDs.
 * Fixes "RCON disabled warning" so it doesn't overflow over other servers when many servers are collapsed.
+* Organized flags are better, for ORGs with many flags. Less scrolling!
+* Grays out unimportant events like joins/leaves.
+
+---- For Community Owners/Devs -------
+* Real-time updating, using github repo as update source for most ORG settings/data.
+* Extension/script version checking, alert users across your ORG when updates are required.
+* Easily modifiable.
+* Divide up permissions, point adminList.json and termList.sjon to a different Github Repo and keep the script under lock and key.
+* Wiki to help users install and set up the script or extension for you to share.
+* Tested in Squad/Arma Reforger communities, support likely in other games (unconfirmed)
 
 ## Getting Started 
 ### See [Getting Started Wiki](https://github.com/Synarious/bm-userscript/wiki ) on how to install & more.
 
-## Contributions
+## Contributions & Notes For Devs
 - [LiQ Gaming](https://liqgaming.com/#/) - Avengerian (time seconds), Got2bHockey (Github Actions)
 - /GmG\ - Eddie (button fixes and CBL bits)
-- This project's scope is limited to reading/modifying the **locally** delivered web content and locally injecting CSS and web improvements without touching the BM API (as such this code could run offline). Code suggestions that automates or performs interactive API requests like bans, kicks and queries using your Battlemetrics tokens will not be merged into this project as that approaches being a self bot which could result in your BM account being suspended. Add such code at your own risk.
+- This project's scope is limited to reading/modifying the **locally** delivered web content and locally injecting CSS and web improvements without touching the BM API (as such this code could run offline). Code suggestions that automates or performs interactive API requests like bans, kicks and queries using your Battlemetrics tokens will not be merged into this project as that approaches being a self-bot which could result in your BM account being suspended. Add such code at your own risk.
+- Auto updating isn't functional due to changes in Chrome Manifest V3, there are some possible workarounds and sadly have been proven to be challenging to get working. Instead of auto updating the entire script, it pulls from JSON files which is tad safer and allows for updating in real time without forcing clients/machines to update. In general the extension/scripts should only need to be updated during feature/breaking updates. 
+
