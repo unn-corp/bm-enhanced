@@ -5,45 +5,6 @@
   "bmORG_ID": "58064",
   "serverName1": "TPS",
   "serverName2": "[NA]",
-  "cornerBTname": "R",
-  "dropdownOptions": [
-    {
-      "label": "Server 1",
-      "url": "https://www.battlemetrics.com/rcon/servers/31707876"
-    },
-    {
-      "label": "Server 2",
-      "url": "https://www.battlemetrics.com/rcon/servers/31707887"
-    },
-    {
-      "label": "Server 3",
-      "url": "https://www.battlemetrics.com/rcon/servers/31707886"
-    },
-    {
-      "label": "Server 4",
-      "url": "https://www.battlemetrics.com/rcon/servers/31707874"
-    },
-    {
-      "label": "Server 5",
-      "url": "https://www.battlemetrics.com/rcon/servers/31490334"
-    },
-    {
-      "label": "Server 6",
-      "url": "https://www.battlemetrics.com/rcon/servers/31517967"
-    },
-    {
-      "label": "Server 7",
-      "url": "https://www.battlemetrics.com/rcon/servers/31569933"
-    },
-    {
-      "label": "Server 8",
-      "url": "https://www.battlemetrics.com/rcon/servers/31707874"
-    },
-    {
-      "label": "Server 9",
-      "url": "https://www.battlemetrics.com/rcon/servers/31879399"
-    }
-  ],
   "sets": {
     "teamKilled": ["team killed"],
     "grayedOut": [
