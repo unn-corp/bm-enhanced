@@ -25,6 +25,7 @@ Which is better? For chrome, the extension has reduced permission scope compared
 * Fixes "RCON disabled warning" so it doesn't overflow over other servers when many servers are collapsed.
 * Organized flags are better, for ORGs with many flags. Less scrolling!
 * Grays out unimportant events like joins/leaves.
+* Highlights the default note icon for better visablity when viewing players. 
 
 ---- For Community Owners/Devs -------
 * Real-time updating, using github repo as update source for most ORG settings/data.
@@ -33,9 +34,10 @@ Which is better? For chrome, the extension has reduced permission scope compared
 * Divide up permissions, point adminList.json and termList.sjon to a different Github Repo and keep the script under lock and key.
 * Wiki to help users install and set up the script or extension for you to share.
 * Tested in Squad/Arma Reforger communities, support likely in other games (unconfirmed)
+* Website (github pages) adminList.json builder [Example](https://synarious.github.io/bm-enhanced/)
 
 ## Getting Started 
-### See [Getting Started Wiki](https://github.com/Synarious/bm-userscript/wiki ) on how to install & more.
+### See [Getting Started Wiki](https://github.com/Synarious/bm-enhanced/wiki ) on how to install & more.
 
 ## Contributions & Notes For Devs
 - [LiQ Gaming](https://liqgaming.com/#/) - Avengerian (time seconds), Got2bHockey (Github Actions)
