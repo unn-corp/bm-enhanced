@@ -14,4 +14,4 @@
 // @connect communitybanlist.com
 // @run-at document-end
 // ==/UserScript==
--
+/\/\/INJECT_MINIFIED_CODE_HERE/
