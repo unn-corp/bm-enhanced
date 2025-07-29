@@ -40,7 +40,7 @@ Which is better? For chrome, the extension has reduced permission scope compared
 ### See [Getting Started Wiki](https://github.com/Synarious/bm-enhanced/wiki ) on how to install & more.
 
 ## Contributions & Notes For Devs
-- Only code you should modify is [ src/source.js | config/adminList.json | config/termList.json ] as minify.js will handle rest. You can run minify.js locally before pushing, or rely on github action to run it.
+- Only code you should modify is [ src/source.js | config/adminList.json | config/termList.json ] as the minify.js will handle the rest. You can run minify.js locally before pushing, or rely on the Github Action to run it.
 - [LiQ Gaming](https://liqgaming.com/#/) - Avengerian (time seconds), Got2bHockey (Github Actions)
 - /GmG\ - Eddie (button fixes and CBL bits)
 - This project's scope is limited to reading/modifying the **locally** delivered web content and locally injecting CSS and web improvements without touching the BM API (as such this code could run offline). Code suggestions that automates or performs interactive API requests like bans, kicks and queries using your Battlemetrics tokens will not be merged into this project as that approaches being a self-bot which could result in your BM account being suspended. Add such code at your own risk.
