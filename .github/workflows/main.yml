@@ -9,7 +9,6 @@ jobs:
   minify-and-update:
     runs-on: ubuntu-latest
 
-    # This grants the workflow permission to write back to the repository.
     permissions:
       contents: write
 
@@ -21,34 +20,41 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm' # Cache npm dependencies for faster runs
+        cache: 'npm'
 
     - name: 📦 Install dependencies
-      # Reads package.json and installs terser
       run: npm install
 
     - name: 🚀 Minify JS with Terser
-      # Executes your custom Node.js script
       run: node minify.js
 
-    - name: 📝 Replace line 17 with minified code
-      run: sed -i -e '17r code/source.min.js' -e '17d' code/tampermonkey_userscript/bm-enhanced.min.js
+    - name: 📝 Update Chrome Extension script
+      # This is a simple copy operation.
+      run: cp code/source.min.js code/chrome-extension/content.js
 
-    - name: 🔄 Update @version in userscript
+    - name: 📝 Update Tampermonkey script
+      # Both modifications to the Tampermonkey script are now in one step.
       run: |
-        # Extract version from source.js
+        # 1. Inject the minified code at line 17.
+        sed -i -e '17r code/source.min.js' -e '17d' code/tampermonkey_userscript/bm-enhanced.min.js
+        # 2. Extract and update the version number on line 4.
         version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
-        # Update version in the Tampermonkey script header
         sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
+
+    - name: 🔍 DEBUG: Display final Tampermonkey script
+      # This step prints the file's content so you can verify it in the action's logs.
+      run: |
+        echo "--- Final content of bm-enhanced.min.js before commit ---"
+        cat code/tampermonkey_userscript/bm-enhanced.min.js
+        echo "---------------------------------------------------------"
 
     - name: ✨ Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "GitHub Actions"
-        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js
-        # Commit only if there are changes, and add [skip ci] to prevent an infinite loop
+        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome-extension/content.js
         if ! git diff --staged --quiet; then
-          git commit -m "build: Minify JS and update version [skip ci]"
+          git commit -m "build: Minify JS and update versions [skip ci]"
           git push
         else
           echo "No changes to commit."
