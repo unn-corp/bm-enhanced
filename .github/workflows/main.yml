@@ -29,26 +29,21 @@ jobs:
       run: node minify.js
 
     - name: 📝 Update Chrome Extension script
-      run: cp code/source.min.js code/chrome_extension/content.js
+      run: cp code/source.min.js code/chrome-extension/content.js
 
     - name: 📝 Update Tampermonkey script
       run: |
-        sed -i -e '17r code/source.min.js' -e '17d' code/tampermonkey_userscript/bm-enhanced.min.js
+        # CORRECTED: Append the minified code after line 16
+        sed -i '16r code/source.min.js' code/tampermonkey_userscript/bm-enhanced.min.js
+        # Then, update the version number on line 4
         version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
         sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
-
-    # This is line 44. Notice its indentation matches the step above and below.
-    - name: Display final Tampermonkey script
-      run: |
-        echo "--- Final content of bm-enhanced.min.js before commit ---"
-        cat code/tampermonkey_userscript/bm-enhanced.min.js
-        echo "---------------------------------------------------------"
 
     - name: ✨ Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "GitHub Actions"
-        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome_extension/content.js
+        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome-extension/content.js
         if ! git diff --staged --quiet; then
           git commit -m "build: Minify JS and update versions [skip ci]"
           git push
