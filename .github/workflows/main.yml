@@ -29,7 +29,7 @@ jobs:
       run: node minify.js
 
     - name: 📝 Update Chrome Extension script
-      run: cp code/source.min.js code/chrome-extension/content.js
+      run: cp code/source.min.js code/chrome_extension/content.js
 
     - name: 📝 Update Tampermonkey script
       run: |
@@ -43,7 +43,7 @@ jobs:
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "GitHub Actions"
-        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome-extension/content.js
+        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome_extension/content.js
         if ! git diff --staged --quiet; then
           git commit -m "build: Minify JS and update versions [skip ci]"
           git push
