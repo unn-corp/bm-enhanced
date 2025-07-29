@@ -11,7 +11,6 @@ const SOURCES = {
  *
  */
 
-
 // DOM query selectors.
 const SELECTORS = {
     logContainer: '.ReactVirtualized__Grid__innerScrollContainer, .css-b7r34x',
