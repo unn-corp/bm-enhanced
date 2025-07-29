@@ -29,20 +29,16 @@ jobs:
       run: node minify.js
 
     - name: 📝 Update Chrome Extension script
-      # This is a simple copy operation.
       run: cp code/source.min.js code/chrome-extension/content.js
 
     - name: 📝 Update Tampermonkey script
-      # Both modifications to the Tampermonkey script are now in one step.
       run: |
-        # 1. Inject the minified code at line 17.
         sed -i -e '17r code/source.min.js' -e '17d' code/tampermonkey_userscript/bm-enhanced.min.js
-        # 2. Extract and update the version number on line 4.
         version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
         sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
 
-    - name: 🔍 DEBUG: Display final Tampermonkey script
-      # This step prints the file's content so you can verify it in the action's logs.
+    # This is line 44. Notice its indentation matches the step above and below.
+    - name: Display final Tampermonkey script
       run: |
         echo "--- Final content of bm-enhanced.min.js before commit ---"
         cat code/tampermonkey_userscript/bm-enhanced.min.js
