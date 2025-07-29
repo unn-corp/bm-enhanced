@@ -15,11 +15,11 @@ const terser = require('terser');
 async function runBuild() {
   // --- Configuration: Define all file paths ---
   const paths = {
-    source: path.join(__dirname, 'code', 'source.js'),
-    minifiedSource: path.join(__dirname, 'code', 'source.min.js'),
-    tampermonkeyTemplate: path.join(__dirname, 'code', 'tampermonkey_userscript', 'template.user.js'),
-    tampermonkeyOutput: path.join(__dirname, 'code', 'tampermonkey_userscript', 'bm-enhanced.min.js'),
-    chromeExtensionOutput: path.join(__dirname, 'code', 'chrome_extension', 'content.js'),
+    source: path.join(__dirname, 'src', 'source.js'),
+    minifiedSource: path.join(__dirname, 'builds', 'source.min.js'),
+    tampermonkeyTemplate: path.join(__dirname, 'builds', 'tampermonkey_userscript', 'template.user.js'),
+    tampermonkeyOutput: path.join(__dirname, 'builds', 'tampermonkey_userscript', 'bm-enhanced.min.js'),
+    chromeExtensionOutput: path.join(__dirname, 'builds', 'chrome_extension', 'content.js'),
   };
 
   try {

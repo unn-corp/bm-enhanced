@@ -2,8 +2,8 @@
 // @name Battlemetrics Toolkit - Desktop
 // @namespace https://www.battlemetrics.com/
 // @version DO NOT EDIT THIS VERSION MANUALLY, IT IS AUTOMATICALLY UPDATED BY THE BUILD SCRIPT
-// @updateURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/code/tampermonkey_userscript/bm-enhanced.min.js
-// @downloadURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/code/tampermonkey_userscript/bm-enhanced.min.js
+// @updateURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/builds/tampermonkey_userscript/bm-enhanced.min.js
+// @downloadURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/builds/tampermonkey_userscript/bm-enhanced.min.js
 // @description Modifies the rcon panel for battlemetrics to help color code important events and details about players.
 // @author Synarion (aka Synarious @ syfusion.com/github)
 // @match https://www.battlemetrics.com/*
