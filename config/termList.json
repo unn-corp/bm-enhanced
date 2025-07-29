@@ -5,8 +5,25 @@
   "bmORG_ID": "58064",
   "serverName1": "TPS",
   "serverName2": "[NA]",
+  "namePrefixes": [
+    "Unn.",
+    "Unn.x",
+    "Uɴɴ.xᴏ.",
+    "Uɴɴ.⚒.",
+    "Uɴɴ.♖.",
+    "Uɴɴ.ʀᴏ.",
+    "Uɴɴ.ᴀ.",
+    "Uɴɴ.ꜱᴀ.",
+    "Uɴɴ.™",
+    "Uɴɴ.ᴀ✘.",
+    "Uɴɴ.✘",
+    "ΞP⋅",
+    "Uɴɴ.ΞP."
+  ],
   "sets": {
-    "teamKilled": ["team killed"],
+    "teamKilled": [
+      "team killed"
+    ],
     "grayedOut": [
       "You were teamkilled!",
       "Please revive the player if you can.) by Trigger.",
@@ -32,9 +49,15 @@
       "Server Population: ",
       "Ban Log: "
     ],
-    "trackedTriggers": ["[SL Kit]"],
-    "leftServer": ["left the server"],
-    "joinedServer": ["joined the server"],
+    "trackedTriggers": [
+      "[SL Kit]"
+    ],
+    "leftServer": [
+      "left the server"
+    ],
+    "joinedServer": [
+      "joined the server"
+    ],
     "actionList": [
       "was warned",
       "was kicked",

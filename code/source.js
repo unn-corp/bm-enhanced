@@ -34,8 +34,6 @@ const SELECTORS = {
     cblInfoContainer: "#CBL-info-container",
 };
 
-
-
 (async () => {
 
     // --- DEBUGGING CONFIGURATION ---
@@ -61,7 +59,18 @@ const SELECTORS = {
     async function fetchJSON(url, sourceName, options = {}) {
         try {
             const response = await fetch(url, options);
-            if (!response.ok) { throw new Error(`HTTP error! Status: ${response.status} for ${sourceName}`); }
+
+            // Handle specific status codes
+            if (response.status === 429) {
+                console.warn(`⏳|BMUS: Rate limited when fetching ${sourceName}. Status: 429`);
+                // Optionally implement retry logic here
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status} for ${sourceName}`);
+            }
+
             const text = await response.text();
             return text ? JSON.parse(text) : null;
         } catch (error) {
@@ -122,11 +131,67 @@ const SELECTORS = {
     function updateLogView() {
         if (!state.config) return;
         const { sets, colors, serverName1, serverName2 } = state.config;
-        const colorRules = [{ elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.joinedServer, color: colors.cJoined }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.leftServer, color: colors.cLeftServer }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.actionList, color: colors.cModAction }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.adminTerms, color: colors.cAdminAction }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup1, color: colors.cFactionGroup1 }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup2, color: colors.cFactionGroup2 }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup3, color: colors.cFactionGroup3 }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.teamKilled, color: colors.cTeamKilled }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.trackedTriggers, color: colors.cTracked }, { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.grayedOut, color: colors.cGrayed },];
+        const colorRules = [
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.joinedServer, color: colors.cJoined },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.leftServer, color: colors.cLeftServer },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.actionList, color: colors.cModAction },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.adminTerms, color: colors.cAdminAction },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup1, color: colors.cFactionGroup1 },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup2, color: colors.cFactionGroup2 },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup3, color: colors.cFactionGroup3 },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.teamKilled, color: colors.cTeamKilled },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.trackedTriggers, color: colors.cTracked },
+            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.grayedOut, color: colors.cGrayed },
+        ];
         colorRules.forEach(({ elements, set, color }) => elements.forEach(element => { if (element.dataset.colored) return; for (const phrase of set) { if (element.textContent.includes(phrase)) { element.style.color = color; element.dataset.colored = 'true'; break; } } }));
+
+        // ---- START OF UPDATED CODE ----
+
         const adminNameElements = document.querySelectorAll(`${SELECTORS.logActivityNames}, ${SELECTORS.logPlayerNames}`);
-        const adminColorRules = [{ elements: adminNameElements, list: state.adminLists.group1, color: colors.cStaffGroup1 }, { elements: adminNameElements, list: state.adminLists.group2, color: colors.cStaffGroup2 }, { elements: adminNameElements, list: state.adminLists.group3, color: colors.cStaffGroup3 }];
-        adminColorRules.forEach(({ elements, list, color }) => elements.forEach(el => { if (el.dataset.colored) return; const elText = el.textContent; for (const admin of list) { if (elText.includes(admin)) { el.style.color = color; el.dataset.colored = 'true'; break; } } }));
+        const adminColorRules = [
+            { elements: adminNameElements, list: state.adminLists.group1, color: colors.cStaffGroup1 },
+            { elements: adminNameElements, list: state.adminLists.group2, color: colors.cStaffGroup2 },
+            { elements: adminNameElements, list: state.adminLists.group3, color: colors.cStaffGroup3 }
+        ];
+
+        // 1. Pull the prefix list from the loaded config (termList.json).
+        //    Falls back to an empty array if 'namePrefixes' is not defined in the JSON.
+        const prefixesToIgnore = state.config.namePrefixes || [];
+
+        /**
+         * Escapes special characters in a string for use in a regular expression.
+         * @param {string} str The string to escape.
+         * @returns {string} The escaped string.
+         */
+        function escapeRegExp(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // 2. Create a regex component that matches any of the specified prefixes followed by optional spaces.
+        const escapedPrefixes = prefixesToIgnore.map(p => escapeRegExp(p)).join('|');
+        const prefixRegexPart = prefixesToIgnore.length > 0 ? `(?:(?:${escapedPrefixes})\\s*)?` : '';
+
+        adminColorRules.forEach(({ elements, list, color }) => {
+            elements.forEach(el => {
+                if (el.dataset.colored) return;
+
+                // Trim any leading whitespace from the element's text content.
+                const elText = el.textContent.trimStart();
+
+                for (const admin of list) {
+                    // 3. Construct a precise, case-sensitive regex for each admin name using the dynamically loaded prefixes.
+                    const adminRegex = new RegExp(`^${prefixRegexPart}${escapeRegExp(admin)}$`);
+
+                    if (adminRegex.test(elText)) {
+                        el.style.color = color;
+                        el.dataset.colored = 'true';
+                        break; // Match found, proceed to the next element.
+                    }
+                }
+            });
+        });
+
+        // ---- END OF UPDATED CODE ----
 
         // Apply local timestamps to the UTC time elements.
         applyTimeStamps();
@@ -134,6 +199,12 @@ const SELECTORS = {
         document.querySelectorAll(SELECTORS.logServerNames).forEach(element => { if (element.dataset.colored) return; if (element.textContent.includes(serverName1)) element.style.color = "green"; else if (element.textContent.includes(serverName2)) element.style.color = "yellow"; element.dataset.colored = 'true'; });
         document.querySelectorAll(SELECTORS.logNoteFlags).forEach(element => element.style.color = colors.cNoteColorIcon);
     }
+
+
+
+
+
+
 
     async function setupPlayerPage() {
         log(2, 'setupPlayerPage() called.');
