@@ -28,25 +28,29 @@ jobs:
     - name: 🚀 Minify JS with Terser
       run: node minify.js
 
-    - name: 📝 Update distribution files
+    - name: 📝 Build Tampermonkey script from template
       run: |
-        # CORRECTED: Find the placeholder, read the new file, then delete the placeholder line.
+        # 1. Create the final script by copying the template.
+        cp code/tampermonkey_userscript/template.user.js code/tampermonkey_userscript/bm-enhanced.min.js
+
+        # 2. Inject the minified code into the new file.
         sed -i '/\/\/INJECT_MINIFIED_CODE_HERE/ {
             r code/source.min.js
             d
         }' code/tampermonkey_userscript/bm-enhanced.min.js
-        # Update the Chrome Extension script by replacing its content
-        cp code/source.min.js code/chrome_extension/content.js
-
-    - name: 🔄 Update @version in userscript
-      run: |
+        
+        # 3. Update the version number in the new file.
         version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
         sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
+
+    - name: 📝 Update Chrome Extension script
+      run: cp code/source.min.js code/chrome_extension/content.js
 
     - name: ✨ Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "GitHub Actions"
+        # The add command now includes the *generated* script
         git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome_extension/content.js
         if ! git diff --staged --quiet; then
           git commit -m "build: Minify JS and update versions [skip ci]"
