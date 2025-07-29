@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Battlemetrics Toolkit - Desktop
 // @namespace https://www.battlemetrics.com/
-// @version 3.00
+// @version DO NOT EDIT THIS VERSION MANUALLY, IT IS AUTOMATICALLY UPDATED BY THE BUILD SCRIPT
 // @updateURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/bm-toolkit-desktop.min.js
 // @downloadURL https://raw.githubusercontent.com/Synarious/bm-enhanced/unnamed/bm-toolkit-desktop.min.js
 // @description Modifies the rcon panel for battlemetrics to help color code important events and details about players.
@@ -14,4 +14,4 @@
 // @connect communitybanlist.com
 // @run-at document-end
 // ==/UserScript==
-/\/\/INJECT_MINIFIED_CODE_HERE/
+//INJECT_MINIFIED_CODE_HERE

@@ -1,59 +1,93 @@
 // Import necessary modules
-const fs = require('fs').promises; // Using the promise-based version of fs for async/await
+const fs = require('fs').promises;
 const path = require('path');
 const terser = require('terser');
 
 /**
- * Minifies a JavaScript file using Terser.
- *
- * This function reads a source file, minifies its content using Terser with
- * compression and name mangling, and writes the result to an output file.
+ * 
+ * Run the script using "node minify.js". Github Actions will always run this script, you can do it locally as well.
+ * 
+ * A comprehensive build script with detailed logging that:
+ * 1. Minifies the source JavaScript.
+ * 2. Builds a Tampermonkey script from a template.
+ * 3. Builds a Chrome Extension content script.
  */
-async function minifyScript() {
-  // --- Configuration ---
-  // Set the input and output file paths
-  const inputPath = path.join(__dirname, 'code', 'source.js'); // Path to the original source.js
-  const outputPath = path.join(__dirname, 'code', 'source.min.js'); // Path to save the minified file
-
-  console.log(`Reading source file from: ${inputPath}`);
+async function runBuild() {
+  // --- Configuration: Define all file paths ---
+  const paths = {
+    source: path.join(__dirname, 'code', 'source.js'),
+    minifiedSource: path.join(__dirname, 'code', 'source.min.js'),
+    tampermonkeyTemplate: path.join(__dirname, 'code', 'tampermonkey_userscript', 'template.user.js'),
+    tampermonkeyOutput: path.join(__dirname, 'code', 'tampermonkey_userscript', 'bm-enhanced.min.js'),
+    chromeExtensionOutput: path.join(__dirname, 'code', 'chrome_extension', 'content.js'),
+  };
 
   try {
-    // Read the source file content
-    const code = await fs.readFile(inputPath, 'utf8');
+    console.log('🚀 Starting build process...');
+    console.log('--------------------------------------------------');
 
-    // Minify the code using Terser
-    // Terser's minify function is asynchronous and returns a promise
-    const result = await terser.minify(code, {
-      compress: true, // Enable compression (optimizes code structure)
-      mangle: {
-        toplevel: true, // Mangle names in the top-level scope
-      },
-      output: {
-        comments: false, // Remove all comments from the output
-      },
-      sourceMap: false, // Optionally, you can generate a source map
+    // --- 1. Read and minify the source code ---
+    console.log('STEP 1: Minifying source code...');
+    console.log(`  - Reading source from: ${paths.source}`);
+    const sourceCode = await fs.readFile(paths.source, 'utf8');
+    const originalSize = Buffer.byteLength(sourceCode, 'utf8');
+    console.log(`  - Original size: ${originalSize} bytes`);
+
+    const result = await terser.minify(sourceCode, {
+      compress: true,
+      mangle: { toplevel: true },
     });
-
-    // Terser returns the minified code in the 'code' property of the result object.
-    // It does not have an 'error' property like UglifyJS; it throws an error on failure.
     const minifiedCode = result.code;
+    const minifiedSize = Buffer.byteLength(minifiedCode, 'utf8');
+    const reduction = (((originalSize - minifiedSize) / originalSize) * 100).toFixed(2);
 
-    // Write the minified output to the destination file
-    await fs.writeFile(outputPath, minifiedCode);
+    await fs.writeFile(paths.minifiedSource, minifiedCode);
+    console.log(`  - Minified size: ${minifiedSize} bytes (Reduction: ${reduction}%)`);
+    console.log(`  - Minified source written to: ${paths.minifiedSource}`);
 
-    console.log(`✅ Minification successful!`);
-    console.log(`Output written to: ${outputPath}`);
+    // --- 2. Extract version from source code ---
+    console.log('\nSTEP 2: Extracting version number...');
+    const versionRegex = /const EXTENSION_VERSION = "([^"]+)"/;
+    const match = sourceCode.match(versionRegex);
+    if (!match) {
+      throw new Error(`Could not find version string matching '${versionRegex}' in ${paths.source}`);
+    }
+    const version = match[1];
+    console.log(`  - Found version: "${version}"`);
+
+    // --- 3. Build the Tampermonkey script ---
+    console.log('\nSTEP 3: Building Tampermonkey script...');
+    console.log(`  - Reading template from: ${paths.tampermonkeyTemplate}`);
+    let templateContent = await fs.readFile(paths.tampermonkeyTemplate, 'utf8');
+
+    console.log('  - Injecting minified code and updating version tag...');
+    templateContent = templateContent
+      .replace('//INJECT_MINIFIED_CODE_HERE', minifiedCode)
+      .replace(/^\/\/ @version .*$/m, `// @version ${version}`);
+
+    await fs.writeFile(paths.tampermonkeyOutput, templateContent);
+    console.log(`  - Tampermonkey script written to: ${paths.tampermonkeyOutput}`);
+
+    // --- 4. Build the Chrome Extension script ---
+    console.log('\nSTEP 4: Building Chrome Extension script...');
+    await fs.writeFile(paths.chromeExtensionOutput, minifiedCode);
+    console.log(`  - Chrome Extension script written to: ${paths.chromeExtensionOutput}`);
+
+    console.log('--------------------------------------------------');
+    console.log('✨ Build finished successfully!');
+    console.log('\nGenerated/Updated Files:');
+    console.log(`  1. ${paths.minifiedSource}`);
+    console.log(`  2. ${paths.tampermonkeyOutput}`);
+    console.log(`  3. ${paths.chromeExtensionOutput}`);
 
   } catch (err) {
-    // Catch and log any errors that occur during the process
-    console.error('🚫 An error occurred during minification:');
+    console.error('\n🚫🚫🚫 BUILD FAILED 🚫🚫🚫');
+    console.error('--------------------------------------------------');
     console.error(err);
+    console.error('--------------------------------------------------');
+    process.exit(1); // Exit with an error code to fail the GitHub Action
   }
 }
 
 // --- Execution ---
-// Before running, make sure to install Terser:
-// npm install terser --save-dev
-
-// Run the minification function
-minifyScript();
+runBuild();

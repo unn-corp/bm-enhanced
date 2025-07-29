@@ -1,4 +1,4 @@
-name: Minify and Update
+name: Build and Deploy
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - '*' # Triggers on push to any branch
 
 jobs:
-  minify-and-update:
+  build-and-commit:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
-    - name:  Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: ⚙️ Setup Node.js
@@ -25,33 +25,15 @@ jobs:
     - name: 📦 Install dependencies
       run: npm install
 
-    - name: 🚀 Minify JS with Terser
+    - name: 🚀 Run build script
+      # This single command now does all the work!
       run: node minify.js
-
-    - name: 📝 Build Tampermonkey script from template
-      run: |
-        # 1. Create the final script by copying the template.
-        cp code/tampermonkey_userscript/template.user.js code/tampermonkey_userscript/bm-enhanced.min.js
-
-        # 2. Inject the minified code into the new file.
-        sed -i '/\/\/INJECT_MINIFIED_CODE_HERE/ {
-            r code/source.min.js
-            d
-        }' code/tampermonkey_userscript/bm-enhanced.min.js
-        
-        # 3. Update the version number in the new file.
-        version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
-        sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
-
-    - name: 📝 Update Chrome Extension script
-      run: cp code/source.min.js code/chrome_extension/content.js
 
     - name: ✨ Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "GitHub Actions"
-        # The add command now includes the *generated* script
-        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome_extension/content.js
+        git add code/source.min.js code/tampermonkey_userscript/bm-enhanced.min.js code/chrome-extension/content.js
         if ! git diff --staged --quiet; then
           git commit -m "build: Minify JS and update versions [skip ci]"
           git push
