@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     steps:
-    - name:  checkout code
+    - name:  Checkout code
       uses: actions/checkout@v4
 
     - name: ⚙️ Setup Node.js
@@ -28,14 +28,18 @@ jobs:
     - name: 🚀 Minify JS with Terser
       run: node minify.js
 
-    - name: 📝 Update Chrome Extension script
-      run: cp code/source.min.js code/chrome_extension/content.js
-
-    - name: 📝 Update Tampermonkey script
+    - name: 📝 Update distribution files
       run: |
-        # CORRECTED: Append the minified code after line 16
-        sed -i '16r code/source.min.js' code/tampermonkey_userscript/bm-enhanced.min.js
-        # Then, update the version number on line 4
+        # CORRECTED: Find the placeholder, read the new file, then delete the placeholder line.
+        sed -i '/\/\/INJECT_MINIFIED_CODE_HERE/ {
+            r code/source.min.js
+            d
+        }' code/tampermonkey_userscript/bm-enhanced.min.js
+        # Update the Chrome Extension script by replacing its content
+        cp code/source.min.js code/chrome_extension/content.js
+
+    - name: 🔄 Update @version in userscript
+      run: |
         version=$(grep -oP 'const EXTENSION_VERSION = "\K[^"]+' code/source.js)
         sed -i "4s#^// @version .*#// @version $version#" code/tampermonkey_userscript/bm-enhanced.min.js
 
