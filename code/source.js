@@ -430,7 +430,7 @@ const SELECTORS = {
 
             banButton.parentNode.replaceChild(newBanButton, banButton);
 
-            log(1, 'Ban button link updated..');
+            log(1, 'Ban button link updated.');
         }
     }
 
