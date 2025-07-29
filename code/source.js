@@ -127,7 +127,6 @@ const SELECTORS = {
         });
     }
 
-
     function updateLogView() {
         if (!state.config) return;
         const { sets, colors, serverName1, serverName2 } = state.config;
@@ -145,7 +144,7 @@ const SELECTORS = {
         ];
         colorRules.forEach(({ elements, set, color }) => elements.forEach(element => { if (element.dataset.colored) return; for (const phrase of set) { if (element.textContent.includes(phrase)) { element.style.color = color; element.dataset.colored = 'true'; break; } } }));
 
-        // ---- START OF UPDATED CODE ----
+        // ---- START OF NEW LOGIC ----
 
         const adminNameElements = document.querySelectorAll(`${SELECTORS.logActivityNames}, ${SELECTORS.logPlayerNames}`);
         const adminColorRules = [
@@ -154,57 +153,53 @@ const SELECTORS = {
             { elements: adminNameElements, list: state.adminLists.group3, color: colors.cStaffGroup3 }
         ];
 
-        // 1. Pull the prefix list from the loaded config (termList.json).
-        //    Falls back to an empty array if 'namePrefixes' is not defined in the JSON.
         const prefixesToIgnore = state.config.namePrefixes || [];
-
-        /**
-         * Escapes special characters in a string for use in a regular expression.
-         * @param {string} str The string to escape.
-         * @returns {string} The escaped string.
-         */
-        function escapeRegExp(str) {
-            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        // 2. Create a regex component that matches any of the specified prefixes followed by optional spaces.
-        const escapedPrefixes = prefixesToIgnore.map(p => escapeRegExp(p)).join('|');
-        const prefixRegexPart = prefixesToIgnore.length > 0 ? `(?:(?:${escapedPrefixes})\\s*)?` : '';
 
         adminColorRules.forEach(({ elements, list, color }) => {
             elements.forEach(el => {
                 if (el.dataset.colored) return;
 
-                // Trim any leading whitespace from the element's text content.
-                const elText = el.textContent.trimStart();
+                const elText = el.textContent.trim();
+                let matchFound = false;
 
                 for (const admin of list) {
-                    // 3. Construct a precise, case-sensitive regex for each admin name using the dynamically loaded prefixes.
-                    const adminRegex = new RegExp(`^${prefixRegexPart}${escapeRegExp(admin)}$`);
-
-                    if (adminRegex.test(elText)) {
-                        el.style.color = color;
-                        el.dataset.colored = 'true';
-                        break; // Match found, proceed to the next element.
+                    // Case 1: Direct match (no prefix)
+                    if (elText === admin) {
+                        matchFound = true;
+                        break;
                     }
+
+                    // Case 2: Match with a prefix
+                    for (const prefix of prefixesToIgnore) {
+                        if (elText.startsWith(prefix)) {
+                            // Get the part of the name after the prefix
+                            const namePart = elText.substring(prefix.length);
+
+                            // If the remaining part, with spaces trimmed, equals the admin name, it's a match.
+                            // This correctly handles "Unn.  Test", "Unn. Test", and "Unn.Test"
+                            if (namePart.trim() === admin) {
+                                matchFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (matchFound) break;
+                }
+
+                if (matchFound) {
+                    el.style.color = color;
+                    el.dataset.colored = 'true';
                 }
             });
         });
 
-        // ---- END OF UPDATED CODE ----
+        // ---- END OF NEW LOGIC ----
 
-        // Apply local timestamps to the UTC time elements.
         applyTimeStamps();
 
         document.querySelectorAll(SELECTORS.logServerNames).forEach(element => { if (element.dataset.colored) return; if (element.textContent.includes(serverName1)) element.style.color = "green"; else if (element.textContent.includes(serverName2)) element.style.color = "yellow"; element.dataset.colored = 'true'; });
         document.querySelectorAll(SELECTORS.logNoteFlags).forEach(element => element.style.color = colors.cNoteColorIcon);
     }
-
-
-
-
-
-
 
     async function setupPlayerPage() {
         log(2, 'setupPlayerPage() called.');
