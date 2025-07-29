@@ -19,6 +19,7 @@
   "dependencies": {
     "crx": "^5.0.1",
     "fs-extra": "^11.3.0",
+    "terser": "^5.43.1",
     "uglify-js": "^3.19.3"
   }
 }

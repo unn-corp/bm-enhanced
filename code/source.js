@@ -81,7 +81,79 @@ const SELECTORS = {
 
     function injectGlobalCSS() {
         if (document.getElementById('bmus-global-styles')) return;
-        const styles = `#bmus-actions-container{position:absolute;top:14.35em;left:19em;z-index:1000;display:flex;align-items:center}#copy-player-info-btn{padding:4px;width:75px;background:rgb(0, 123, 255);color:white;border:none;border-radius:5px;cursor:pointer}#CBL-info-container{margin-left:10px;padding:4px 8px;background:#000000bd;color:white;border-radius:5px;font-size:14px;font-weight:bold;white-space:nowrap;text-decoration:none;transition:filter 0.2s}#CBL-info-container:hover{filter: brightness(1.2)}.main{width:90% !important;margin-left:4em;margin-right:4em}@media (max-width: 768px){.main{width:inherit !important}}.css-1nxi32t{width:1px}.css-1xkypod{position:unset !important}.css-mxzvlz{padding-left:0.5em;width:20%;display:inline-table}.css-110bni0{font-size:14px}@media (max-width: 1099px) and (min-width: 950px){.css-mxzvlz{width:33%;display:inline-table}}@media (max-width: 949px) and (min-width: 601px){.css-mxzvlz{width:50%;display:inline-table}}@media (max-width: 600px){.css-mxzvlz{width:100%;display:inline-table}}`;
+        const styles = `
+            #bmus-actions-container {
+                position: absolute;
+                top: 14.35em;
+                left: 19em;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+            }
+            #copy-player-info-btn {
+                padding: 4px;
+                width: 75px;
+                background: rgb(0,  123,  255);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #CBL-info-container {
+                margin-left: 10px;
+                padding: 4px 8px;
+                background: #000000bd;
+                color: white;
+                border-radius: 5px;
+                font-size: 14px;
+                font-weight: bold;
+                white-space: nowrap;
+                text-decoration: none;
+                transition: filter 0.2s;
+            }
+            #CBL-info-container:hover {
+                filter:  brightness(1.2);
+            }
+            .main {
+                width: 90% !important;
+                margin-left: 4em;
+                margin-right: 4em;
+            }
+            @media (max-width: 768px) {
+                .main {
+                width: inherit !important;
+            }
+            }.css-1nxi32t {
+                width: 1px;
+            }
+            .css-1xkypod {
+                position: unset !important;
+            }
+            .css-mxzvlz {
+                padding-left: 0.5em;
+                width: 20%;
+                display: inline-table;
+            }
+            .css-110bni0 {
+                font-size: 14px;
+            }
+            @media (max-width: 1099px) and (min-width: 950px) {
+                .css-mxzvlz {
+                width: 33%;
+                display: inline-table;
+            }
+            }@media (max-width: 949px) and (min-width: 601px) {
+                .css-mxzvlz {
+                width: 50%;
+                display: inline-table;
+            }
+                
+            }@media (max-width: 600px) {
+                .css-mxzvlz {
+                width: 100%;
+                display: inline-table;
+            }
+        }`
         const styleSheet = document.createElement("style");
         styleSheet.id = 'bmus-global-styles';
         styleSheet.textContent = styles;
