@@ -8,7 +8,9 @@
   },
   "permissions": [
     "scripting",
-    "storage"
+    "storage",
+    "tabs",
+    "offscreen"
   ],
   "host_permissions": [
     "https://www.battlemetrics.com/*",
@@ -23,7 +25,9 @@
     }
   ],
   "web_accessible_resources": [{
-    "resources": ["icons/icon.png"],
+    "resources": [
+        "icons/icon.png"
+    ],
     "matches": ["https://www.battlemetrics.com/*"]
   }]
 }

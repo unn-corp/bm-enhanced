@@ -1,5 +1,7 @@
-const EXTENSION_VERSION = "3.00"; // This number must match termList.json or the extension will warn you about a version mismatch. This makes sure users are running the correct version of the script.
-const bmORG_ID = 58064; // This is the organization ID for the BMUS organization. It is used to filter the ban list to only show bans from this organization.
+// Must match termList.json to prevent version mismatch warnings.
+const EXTENSION_VERSION = "3.00";
+// BMUS Org ID, used for filtering the ban list.
+const bmORG_ID = 58064;
 const SOURCES = {
     adminList: "https://raw.githubusercontent.com/Synarious/bm-enhanced/refs/heads/unnamed/src/config/adminList.json",
     customConfig: "https://raw.githubusercontent.com/Synarious/bm-enhanced/refs/heads/unnamed/src/config/termList.json",
@@ -11,7 +13,7 @@ const SOURCES = {
  *
  */
 
-// DOM query selectors.
+// DOM selectors.
 const SELECTORS = {
     logContainer: '.ReactVirtualized__Grid__innerScrollContainer, .css-b7r34x',
     logMessages: ".css-ym7lu8",
@@ -35,14 +37,8 @@ const SELECTORS = {
 
 (async () => {
 
-    // --- DEBUGGING CONFIGURATION ---
     const DEBUG_LEVEL = 1; // 0=Off, 1=Basic, 2=Detailed, 3=Verbose
 
-    /**
-     * Custom logger that respects the DEBUG_LEVEL.
-     * @param {number} level - The debug level of this message.
-     * @param {...any} args - The content to log.
-     */
     function log(level, ...args) {
         if (level <= DEBUG_LEVEL) {
             console.log('BMUS_LOG |', ...args);
@@ -51,15 +47,23 @@ const SELECTORS = {
 
     const state = {
         config: null,
-        adminLists: { group1: new Set(), group2: new Set(), group3: new Set() },
-        page: { isPlayerPage: false, isLogView: false, isOrgEditPage: false }
+        adminLists: {
+            group1: new Set(),
+            group2: new Set(),
+            group3: new Set()
+        },
+        page: {
+            isPlayerPage: false,
+            isLogView: false,
+            isOrgEditPage: false
+        }
     };
 
     async function fetchJSON(url, sourceName, options = {}) {
         try {
             const response = await fetch(url, options);
 
-            // Handle specific status codes
+            // Handle rate limiting
             if (response.status === 429) {
                 console.warn(`⏳|BMUS: Rate limited when fetching ${sourceName}. Status: 429`);
                 // Optionally implement retry logic here
@@ -72,7 +76,8 @@ const SELECTORS = {
 
             const text = await response.text();
             return text ? JSON.parse(text) : null;
-        } catch (error) {
+        }
+        catch (error) {
             console.error(`🚫|BMUS: Failed to fetch ${sourceName}.`, error);
             return null;
         }
@@ -162,11 +167,30 @@ const SELECTORS = {
 
     function showVersionMismatchWarning(localVer, remoteVer, message) {
         const warningBox = document.createElement("div");
-        Object.assign(warningBox.style, { position: "fixed", top: "0", left: "0", width: "100%", height: "100%", backgroundColor: "rgba(19, 19, 19, 0.85)", color: "white", zIndex: "99999", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", fontSize: "2rem", fontWeight: "bold", textAlign: "center", backdropFilter: "blur(5px)" });
-        warningBox.innerHTML = `<div>🚨 Battlemetrics - Chrome Extension Version Warning 🚨<br><br><div style="font-size: 1.5rem; max-width: 800px;">${message}</div><br><br>Local version: <span style="color: yellow">${localVer}</span> /// Remote version: <span style="color: cyan">${remoteVer}</span><br><br><button id="closeWarningBtn" style="padding: 10px 20px; font-size: 1rem; background: white; color: red; border: none; cursor: pointer; border-radius: 5px;">Ignore Warning & Close</button></div>`;
+        Object.assign(warningBox.style, {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(19, 19, 19, 0.85)",
+            color: "white",
+            zIndex: "99999",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            textAlign: "center",
+            backdropFilter: "blur(5px)"
+        });
+        warningBox.innerHTML =
+            `<div>🚨 Battlemetrics - Chrome Extension Version Warning 🚨<br><br><div style="font-size: 1.5rem; max-width: 800px;">${message}</div><br><br>Local version: <span style="color: yellow">${localVer}</span> /// Remote version: <span style="color: cyan">${remoteVer}</span><br><br><button id="closeWarningBtn" style="padding: 10px 20px; font-size: 1rem; background: white; color: red; border: none; cursor: pointer; border-radius: 5px;">Ignore Warning & Close</button></div>`;
         document.body.appendChild(warningBox);
         document.getElementById("closeWarningBtn").addEventListener("click", () => warningBox.remove());
     }
+
     function applyTimeStamps() {
         const timeStampElements = document.querySelectorAll(`${SELECTORS.logTimestamps}, ${SELECTORS.logTimestampsLong}`);
 
@@ -200,33 +224,137 @@ const SELECTORS = {
 
     function updateLogView() {
         if (!state.config) return;
-        const { sets, colors, serverName1, serverName2 } = state.config;
-        const colorRules = [
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.joinedServer, color: colors.cJoined },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.leftServer, color: colors.cLeftServer },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.actionList, color: colors.cModAction },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.adminTerms, color: colors.cAdminAction },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup1, color: colors.cFactionGroup1 },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup2, color: colors.cFactionGroup2 },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.factionGroup3, color: colors.cFactionGroup3 },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.teamKilled, color: colors.cTeamKilled },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.trackedTriggers, color: colors.cTracked },
-            { elements: document.querySelectorAll(SELECTORS.logMessages), set: sets.grayedOut, color: colors.cGrayed },
+        const {
+            sets,
+            colors,
+            serverName1,
+            serverName2
+        } = state.config;
+        const colorRules = [{
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.joinedServer,
+            color: colors.cJoined
+        },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.leftServer,
+                color: colors.cLeftServer
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.actionList,
+                color: colors.cModAction
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.adminTerms,
+                color: colors.cAdminAction
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.factionGroup1,
+                color: colors.cFactionGroup1
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.factionGroup2,
+                color: colors.cFactionGroup2
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.factionGroup3,
+                color: colors.cFactionGroup3
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.teamKilled,
+                color: colors.cTeamKilled
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.trackedTriggers,
+                color: colors.cTracked
+            },
+            {
+                elements: document.querySelectorAll(SELECTORS.logMessages),
+                set: sets.grayedOut,
+                color: colors.cGrayed
+            },
         ];
-        colorRules.forEach(({ elements, set, color }) => elements.forEach(element => { if (element.dataset.colored) return; for (const phrase of set) { if (element.textContent.includes(phrase)) { element.style.color = color; element.dataset.colored = 'true'; break; } } }));
 
-        // ---- START OF NEW LOGIC ----
+        colorRules.forEach(({
+                                elements,
+                                set,
+                                color
+                            }) => {
+            elements.forEach(element => {
+                const isTextColorApplied = element.dataset.colored === 'true';
+
+                for (const phrase of set) {
+                    if (element.textContent.includes(phrase)) {
+                        if (!isTextColorApplied) {
+                            element.style.color = color;
+                            element.dataset.colored = 'true';
+                        }
+
+                        // Specifically check for the teamKilled set to add a background color
+                        if (set === sets.teamKilled) {
+                            const logLineContainer = element.parentElement;
+                            if (logLineContainer && !logLineContainer.dataset.backgroundApplied) {
+                                logLineContainer.style.backgroundColor = '#292135';
+                                logLineContainer.dataset.backgroundApplied = 'true';
+                            }
+                        }
+
+                        if (isTextColorApplied) continue;
+
+                        break;
+                    }
+                }
+            });
+        });
+
+        // Highlights !admin calls ---
+        const adminCallRegex = /^!admin/i; // Matches "!admin" case-insensitively at the start
+        const adminCallBackgroundColor = '#9a000040';
+
+        document.querySelectorAll(SELECTORS.logMessages).forEach(element => {
+            const logLineContainer = element.parentElement;
+            // Ensure we don't re-style an element that already has a background
+            if (logLineContainer && logLineContainer.dataset.backgroundApplied) return;
+
+            // Check if the message is an admin call
+            if (adminCallRegex.test(element.textContent.trim())) {
+                logLineContainer.style.backgroundColor = adminCallBackgroundColor;
+                logLineContainer.dataset.backgroundApplied = 'true'; // Mark as styled
+            }
+        });
 
         const adminNameElements = document.querySelectorAll(`${SELECTORS.logActivityNames}, ${SELECTORS.logPlayerNames}`);
-        const adminColorRules = [
-            { elements: adminNameElements, list: state.adminLists.group1, color: colors.cStaffGroup1 },
-            { elements: adminNameElements, list: state.adminLists.group2, color: colors.cStaffGroup2 },
-            { elements: adminNameElements, list: state.adminLists.group3, color: colors.cStaffGroup3 }
+        const adminColorRules = [{
+            elements: adminNameElements,
+            list: state.adminLists.group1,
+            color: colors.cStaffGroup1
+        },
+            {
+                elements: adminNameElements,
+                list: state.adminLists.group2,
+                color: colors.cStaffGroup2
+            },
+            {
+                elements: adminNameElements,
+                list: state.adminLists.group3,
+                color: colors.cStaffGroup3
+            }
         ];
 
         const prefixesToIgnore = state.config.namePrefixes || [];
 
-        adminColorRules.forEach(({ elements, list, color }) => {
+        adminColorRules.forEach(({
+                                     elements,
+                                     list,
+                                     color
+                                 }) => {
             elements.forEach(el => {
                 if (el.dataset.colored) return;
 
@@ -234,20 +362,14 @@ const SELECTORS = {
                 let matchFound = false;
 
                 for (const admin of list) {
-                    // Case 1: Direct match (no prefix)
                     if (elText === admin) {
                         matchFound = true;
                         break;
                     }
 
-                    // Case 2: Match with a prefix
                     for (const prefix of prefixesToIgnore) {
                         if (elText.startsWith(prefix)) {
-                            // Get the part of the name after the prefix
                             const namePart = elText.substring(prefix.length);
-
-                            // If the remaining part, with spaces trimmed, equals the admin name, it's a match.
-                            // This correctly handles "Unn.  Test", "Unn. Test", and "Unn.Test"
                             if (namePart.trim() === admin) {
                                 matchFound = true;
                                 break;
@@ -264,11 +386,14 @@ const SELECTORS = {
             });
         });
 
-        // ---- END OF NEW LOGIC ----
+        applyTimeStamps(); // Triggers timestamp tooltip code.
 
-        applyTimeStamps();
-
-        document.querySelectorAll(SELECTORS.logServerNames).forEach(element => { if (element.dataset.colored) return; if (element.textContent.includes(serverName1)) element.style.color = "green"; else if (element.textContent.includes(serverName2)) element.style.color = "yellow"; element.dataset.colored = 'true'; });
+        document.querySelectorAll(SELECTORS.logServerNames).forEach(element => {
+            if (element.dataset.colored) return;
+            if (element.textContent.includes(serverName1)) element.style.color = "green";
+            else if (element.textContent.includes(serverName2)) element.style.color = "yellow";
+            element.dataset.colored = 'true';
+        });
         document.querySelectorAll(SELECTORS.logNoteFlags).forEach(element => element.style.color = colors.cNoteColorIcon);
     }
 
@@ -334,7 +459,8 @@ const SELECTORS = {
                 actionsContainer.appendChild(cblLink);
                 log(2, 'Calling fetchCBLData().');
                 await fetchCBLData(steamID, cblLink);
-            } else {
+            }
+            else {
                 const cblDiv = document.createElement("div");
                 cblDiv.id = SELECTORS.cblInfoContainer.substring(1);
                 cblDiv.innerHTML = '<span>CBL: SteamID not found</span>';
@@ -360,8 +486,13 @@ const SELECTORS = {
             const typeEl = row.querySelector('td[data-title="Type"] div.css-18s4qom');
             const timeEl = row.querySelector('td[data-title="Last Seen"] time');
             if (valueEl && typeEl && timeEl) {
-                allIdentifiers.push({ value: valueEl.textContent.trim(), type: typeEl.textContent.trim(), timestamp: new Date(timeEl.getAttribute('datetime')) });
-            } else {
+                allIdentifiers.push({
+                    value: valueEl.textContent.trim(),
+                    type: typeEl.textContent.trim(),
+                    timestamp: new Date(timeEl.getAttribute('datetime'))
+                });
+            }
+            else {
                 log(2, `Warning: Failed to parse row ${index}.`);
             }
         });
@@ -399,9 +530,17 @@ const SELECTORS = {
         const graphqlEndpoint = "https://communitybanlist.com/graphql";
         const query = {
             query: `query Search($id: String!) { steamUser(id: $id) { riskRating, activeBans: bans(expired: false) { edges { node { id } } }, expiredBans: bans(expired: true) { edges { node { id } } } } }`,
-            variables: { id: steamID }
+            variables: {
+                id: steamID
+            }
         };
-        const fetchOptions = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(query) };
+        const fetchOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(query)
+        };
         const data = await fetchJSON(graphqlEndpoint, "CBL GraphQL", fetchOptions);
         log(3, 'CBL Response Data:', data);
         if (data?.data?.steamUser) {
@@ -410,8 +549,10 @@ const SELECTORS = {
             const activeBans = user.activeBans?.edges?.length ?? 0;
             const expiredBans = user.expiredBans?.edges?.length ?? 0;
             const riskColor = riskRating > 5 ? "red" : riskRating > 0 ? "orange" : "white";
-            container.innerHTML = `<span style="color: ${riskColor};">CBL: ${riskRating}/10</span> | <span>Act: ${activeBans}</span> | <span>Exp: ${expiredBans}</span>`;
-        } else {
+            container.innerHTML =
+                `<span style="color: ${riskColor};">CBL: ${riskRating}/10</span> | <span>Act: ${activeBans}</span> | <span>Exp: ${expiredBans}</span>`;
+        }
+        else {
             container.innerHTML = '<span>CBL: Not Found</span>';
         }
     }
@@ -449,39 +590,35 @@ const SELECTORS = {
         });
     }
 
-    function setupCornerButtons() {
-        if (document.querySelector(SELECTORS.cornerButtonContainer)) return;
-        const container = document.createElement("div");
-        container.id = SELECTORS.cornerButtonContainer.substring(1);
-        Object.assign(container.style, { position: "fixed", bottom: "10px", right: "10px", zIndex: "99999" });
-        const versionButton = document.createElement("button");
-        versionButton.textContent = `v${EXTENSION_VERSION}`;
-        Object.assign(versionButton.style, { background: "black", color: "white", border: "1px solid white", borderRadius: "5px", padding: "5px", fontSize: "10px", cursor: "pointer" });
-        container.appendChild(versionButton);
-        document.body.appendChild(container);
-        log(2, 'Corner buttons set up.');
-    }
-
     function handleDOMChange() {
         log(3, 'DOM Change Detected, running checks...');
         const onPlayerPage = document.querySelector(SELECTORS.playerPage);
         if (onPlayerPage) {
             setupPlayerPage();
-        } else {
+        }
+        else {
             if (state.page.isPlayerPage) {
                 log(1, 'Left player page, cleaning up.');
                 document.querySelector(SELECTORS.actionsContainer)?.remove();
                 state.page.isPlayerPage = false;
             }
         }
-        if (document.querySelector(SELECTORS.logContainer)) { updateLogView(); }
-        if (document.querySelector(SELECTORS.orgEditPage)) { updateOrgEditPage(); } else { state.page.isOrgEditPage = false; }
+        if (document.querySelector(SELECTORS.logContainer)) {
+            updateLogView();
+        }
+        if (document.querySelector(SELECTORS.orgEditPage)) {
+            updateOrgEditPage();
+        }
+        else {
+            state.page.isOrgEditPage = false;
+        }
         setupBanButton();
     }
 
     async function main() {
         log(1, `🚀 BMUS v${EXTENSION_VERSION}: Initializing...`);
-        const [customConfig, adminList] = await Promise.all([fetchJSON(SOURCES.customConfig, "Custom Config"), fetchJSON(SOURCES.adminList, "Admin List")]);
+        const [customConfig, adminList] = await Promise.all([fetchJSON(SOURCES.customConfig, "Custom Config"), fetchJSON(SOURCES.adminList,
+            "Admin List")]);
         if (!customConfig) {
             showVersionMismatchWarning(EXTENSION_VERSION, "Error", `Could not load required configuration from:\n${SOURCES.customConfig}`);
             return;
@@ -490,9 +627,12 @@ const SELECTORS = {
         const remoteVersion = state.config?.chrome_extension_version;
         if (!remoteVersion) {
             showVersionMismatchWarning(EXTENSION_VERSION, "Unavailable", `Remote version is missing from config.\nURL: ${SOURCES.customConfig}`);
-        } else if (remoteVersion !== EXTENSION_VERSION) {
-            showVersionMismatchWarning(EXTENSION_VERSION, remoteVersion, `Your script version is out of date. Please update.\nConfig URL: ${SOURCES.customConfig}`);
-        } else {
+        }
+        else if (remoteVersion !== EXTENSION_VERSION) {
+            showVersionMismatchWarning(EXTENSION_VERSION, remoteVersion,
+                `Your script version is mismatched or outdated. Please update.\nConfig URL: ${SOURCES.customConfig}`);
+        }
+        else {
             log(1, `Extension version (${EXTENSION_VERSION}) is up to date.`);
         }
         if (adminList) {
@@ -502,12 +642,14 @@ const SELECTORS = {
             log(2, 'Admin lists loaded.');
         }
         injectGlobalCSS();
-        setupCornerButtons();
         const observer = new MutationObserver(handleDOMChange);
-        observer.observe(document.body, { childList: true, subtree: true });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
         handleDOMChange();
         log(1, "👀 Observer is active.");
     }
 
-    main();
+    await main();
 })();

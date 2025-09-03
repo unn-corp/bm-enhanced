@@ -27,7 +27,7 @@ async function runBuild() {
     console.log('--------------------------------------------------');
 
     // --- 1. Read and minify the source code ---
-    console.log('STEP 1: Minifying source code...');
+    console.log('Task 1: Minifying source code...');
     console.log(`  - Reading source from: ${paths.source}`);
     const sourceCode = await fs.readFile(paths.source, 'utf8');
     const originalSize = Buffer.byteLength(sourceCode, 'utf8');
@@ -46,7 +46,7 @@ async function runBuild() {
     console.log(`  - Minified source written to: ${paths.minifiedSource}`);
 
     // --- 2. Extract version from source code ---
-    console.log('\nSTEP 2: Extracting version number...');
+    console.log('\nTask 2: Extracting version number...');
     const versionRegex = /const EXTENSION_VERSION = "([^"]+)"/;
     const match = sourceCode.match(versionRegex);
     if (!match) {
@@ -56,7 +56,7 @@ async function runBuild() {
     console.log(`  - Found version: "${version}"`);
 
     // --- 3. Build the Tampermonkey script ---
-    console.log('\nSTEP 3: Building Tampermonkey script...');
+    console.log('\nTask 3: Building Tampermonkey script...');
     console.log(`  - Reading template from: ${paths.tampermonkeyTemplate}`);
     let templateContent = await fs.readFile(paths.tampermonkeyTemplate, 'utf8');
 
@@ -69,7 +69,7 @@ async function runBuild() {
     console.log(`  - Tampermonkey script written to: ${paths.tampermonkeyOutput}`);
 
     // --- 4. Build the Chrome Extension script ---
-    console.log('\nSTEP 4: Building Chrome Extension script...');
+    console.log('\nTask 4: Building Chrome Extension script...');
     await fs.writeFile(paths.chromeExtensionOutput, minifiedCode);
     console.log(`  - Chrome Extension script written to: ${paths.chromeExtensionOutput}`);
 
