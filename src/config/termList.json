@@ -1,6 +1,6 @@
 {
-  "version": "3.00",
-  "chrome_extension_version": "3.00",
+  "version": "3.01",
+  "chrome_extension_version": "3.01",
   "updateRate": "65",
   "bmORG_ID": "58064",
   "serverName1": "TPS",
@@ -78,7 +78,7 @@
       "added BattleMetrics Ban",
       "deleted BattleMetrics Ban"
     ],
-    "factionGroup1": [
+    "coloredGroup1": [
       "Australian Defence Force",
       "British Armed Forces",
       "Canadian Armed Forces",
@@ -86,7 +86,7 @@
       "United States Marine Corps",
       "Turkish Land Forces"
     ],
-    "factionGroup2": [
+    "coloredGroup2": [
       "Russian Ground Forces",
       "Middle Eastern Alliance",
       "Middle Eastern Insurgents",
@@ -98,7 +98,7 @@
       "PLA Amphibious Ground Forces",
       "Ground Forces of Iran"
     ],
-    "factionGroup3": [
+    "coloredGroup3": [
       "Western Private Military Contractors",
       "Canadian Resistance Forces"
     ],
@@ -125,9 +125,9 @@
     "cStaffGroup1": "#00fdff",
     "cStaffGroup2": "#00ff5c",
     "cStaffGroup3": "#00ffbb",
-    "cFactionGroup1": "#4eacff",
-    "cFactionGroup2": "#d0b1ff",
-    "cFactionGroup3": "#fd6aff",
+    "cColoredGroup1": "#4eacff",
+    "cColoredGroup2": "#d0b1ff",
+    "cColoredGroup3": "#fd6aff",
     "cModAction": "#ff3333",
     "cAdminAction": "#37ff00",
     "cTeamKilled": "#ffcc00",

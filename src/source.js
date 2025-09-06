@@ -1,5 +1,5 @@
 // Must match termList.json to prevent version mismatch warnings.
-const EXTENSION_VERSION = "3.00";
+const EXTENSION_VERSION = "3.01";
 // BMUS Org ID, used for filtering the ban list.
 const bmORG_ID = 58064;
 const SOURCES = {
@@ -235,84 +235,83 @@ const SELECTORS = {
             set: sets.joinedServer,
             color: colors.cJoined
         },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.leftServer,
-                color: colors.cLeftServer
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.actionList,
-                color: colors.cModAction
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.adminTerms,
-                color: colors.cAdminAction
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.factionGroup1,
-                color: colors.cFactionGroup1
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.factionGroup2,
-                color: colors.cFactionGroup2
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.factionGroup3,
-                color: colors.cFactionGroup3
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.teamKilled,
-                color: colors.cTeamKilled
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.trackedTriggers,
-                color: colors.cTracked
-            },
-            {
-                elements: document.querySelectorAll(SELECTORS.logMessages),
-                set: sets.grayedOut,
-                color: colors.cGrayed
-            },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.leftServer,
+            color: colors.cLeftServer
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.actionList,
+            color: colors.cModAction
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.adminTerms,
+            color: colors.cAdminAction
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.coloredGroup1,
+            color: colors.cColoredGroup1
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.coloredGroup2,
+            color: colors.cColoredGroup2
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.coloredGroup3,
+            color: colors.cColoredGroup3
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.teamKilled,
+            color: colors.cTeamKilled
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.trackedTriggers,
+            color: colors.cTracked
+        },
+        {
+            elements: document.querySelectorAll(SELECTORS.logMessages),
+            set: sets.grayedOut,
+            color: colors.cGrayed
+        },
         ];
 
-        colorRules.forEach(({
-                                elements,
-                                set,
-                                color
-                            }) => {
-            elements.forEach(element => {
-                const isTextColorApplied = element.dataset.colored === 'true';
-
-                for (const phrase of set) {
-                    if (element.textContent.includes(phrase)) {
-                        if (!isTextColorApplied) {
-                            element.style.color = color;
-                            element.dataset.colored = 'true';
-                        }
-
-                        // Specifically check for the teamKilled set to add a background color
-                        if (set === sets.teamKilled) {
-                            const logLineContainer = element.parentElement;
-                            if (logLineContainer && !logLineContainer.dataset.backgroundApplied) {
-                                logLineContainer.style.backgroundColor = '#292135';
-                                logLineContainer.dataset.backgroundApplied = 'true';
-                            }
-                        }
-
-                        if (isTextColorApplied) continue;
-
-                        break;
-                    }
+        function applyStylingRules(rules) {
+            rules.forEach(({ elements, phrases, styles }) => {
+                // --- ADD THIS CHECK ---
+                // If 'phrases' is not a valid array, log an error and skip this rule.
+                if (!Array.isArray(phrases)) {
+                    console.error('Skipping a rule because its "phrases" property is not an array.', { elements, styles });
+                    return; // Exit the callback for this rule and move to the next one
                 }
+                // --- END OF CHECK ---
+
+                elements.forEach(element => {
+                    // Now this line is safe because we know 'phrases' is an array.
+                    if (!phrases.some(phrase => element.textContent.includes(phrase))) {
+                        return;
+                    }
+
+                    const backgroundTarget = styles.applyToParent ? element.parentElement : element;
+
+                    if (styles.color && element.dataset.textColorApplied !== 'true') {
+                        element.style.color = styles.color;
+                        element.dataset.textColorApplied = 'true';
+                    }
+
+                    if (styles.backgroundColor && backgroundTarget && backgroundTarget.dataset.backgroundApplied !== 'true') {
+                        backgroundTarget.style.backgroundColor = styles.backgroundColor;
+                        backgroundTarget.dataset.backgroundApplied = 'true';
+                    }
+                });
             });
-        });
+        }
 
         // Highlights !admin calls ---
         const adminCallRegex = /^!admin/i; // Matches "!admin" case-insensitively at the start
@@ -336,25 +335,25 @@ const SELECTORS = {
             list: state.adminLists.group1,
             color: colors.cStaffGroup1
         },
-            {
-                elements: adminNameElements,
-                list: state.adminLists.group2,
-                color: colors.cStaffGroup2
-            },
-            {
-                elements: adminNameElements,
-                list: state.adminLists.group3,
-                color: colors.cStaffGroup3
-            }
+        {
+            elements: adminNameElements,
+            list: state.adminLists.group2,
+            color: colors.cStaffGroup2
+        },
+        {
+            elements: adminNameElements,
+            list: state.adminLists.group3,
+            color: colors.cStaffGroup3
+        }
         ];
 
         const prefixesToIgnore = state.config.namePrefixes || [];
 
         adminColorRules.forEach(({
-                                     elements,
-                                     list,
-                                     color
-                                 }) => {
+            elements,
+            list,
+            color
+        }) => {
             elements.forEach(el => {
                 if (el.dataset.colored) return;
 
