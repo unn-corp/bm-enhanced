@@ -69,8 +69,12 @@
       "was warned to get SL kit. Is Squad Leader",
       "Trigger added flag [T] New Squad Player",
       "Server responded to query",
-      "\n(Global) Shout out to our Only Fan:",
-      "Shout out to our Only Fan"
+      "(Global) Shout out to our Only Fan:",
+      "Shout out to our Only Fan",
+      "was warned (theunnamedcorp.com) by Trigger.",
+      "(Welcome to the Unnamed! Please read the rules on our website!)",
+      "(Global) All regular server rules are in effect",
+      "(Global) Thank you for helping us seed"
     ],
     "trackedTriggers": [
       "[SL Kit]"
