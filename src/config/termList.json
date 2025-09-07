@@ -61,7 +61,14 @@
       "Be sure to leave a tip for that peep",
       "(You have entered this",
       "Server Population: ",
-      "Ban Log: "
+      "Ban Log: ",
+      "Trigger executed raw command AdminWarn",
+      "Server Population:",
+      "Trigger added flag",
+      "Welcome to the Unnamed! Please read the rules on our website!",
+      "was warned to get SL kit. Is Squad Leader",
+      "Trigger added flag [T] New Squad Player",
+      "Server responded to query"
     ],
     "trackedTriggers": [
       "[SL Kit]"
