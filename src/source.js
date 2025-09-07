@@ -583,7 +583,7 @@ const SELECTORS = {
 
             const newBanButton = banButton.cloneNode(true);
 
-            newBanButton.href = "/rcon/bans?filter%5Borganization%5D=" + bmORG_ID;
+            newBanButton.href = "/rcon/bans?filter%5Borganization%5D=" + bmORG_ID + "&filter%5Bexpired%5D=true";
             newBanButton.dataset.modified = 'true';
 
             banButton.parentNode.replaceChild(newBanButton, banButton);
