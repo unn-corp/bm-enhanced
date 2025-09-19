@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/Synarious/bm-enhanced#readme",
   "dependencies": {
-    "terser": "^5.43.1"
+    "terser": "^5.44.0"
   }
 }
