@@ -7,8 +7,8 @@ const EXTENSION_VERSION = "3.01";
 // BMUS Org ID, used for filtering the ban list.
 const bmORG_ID = 58064;
 const SOURCES = {
-    adminList: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/unnamed/src/config/adminList.json",
-    customConfig: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/unnamed/src/config/termList.json",
+    adminList: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/main/src/config/adminList.json",
+    customConfig: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/main/src/config/termList.json",
 };
 
 // DOM selectors.
