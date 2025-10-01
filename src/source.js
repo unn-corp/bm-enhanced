@@ -5,10 +5,14 @@
 // Must match termList.json to prevent version mismatch warnings.
 const EXTENSION_VERSION = "3.01";
 // BMUS Org ID, used for filtering the ban list.
-const bmORG_ID = 58064;
-const SOURCES = {
-    adminList: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/main/src/config/adminList.json",
-    customConfig: "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/main/src/config/termList.json",
+
+/** BMUS Organization ID for filtering ban lists */
+const BM_ORG_ID = 58064;
+
+/** External data source URLs */
+const DATA_SOURCES = {
+    adminList: "https://raw.githubusercontent.com/Synarious/bm-enhanced/refs/heads/unnamed/src/config/adminList.json",
+    customConfig: "https://raw.githubusercontent.com/Synarious/bm-enhanced/refs/heads/unnamed/src/config/termList.json",
 };
 
 // DOM selectors.
@@ -252,6 +256,7 @@ const SELECTORS = {
                 color: 'lime',
             },
             // Rules for text colors and special backgrounds
+            { phrases: sets.grayedOut, color: colors.cGrayed },
             { phrases: sets.teamKilled, color: colors.cTeamKilled, backgroundColor: '#292135' },
             { phrases: sets.joinedServer, color: colors.cJoined },
             { phrases: sets.leftServer, color: colors.cLeftServer },
@@ -260,8 +265,7 @@ const SELECTORS = {
             { phrases: sets.coloredGroup1, color: colors.cColoredGroup1 },
             { phrases: sets.coloredGroup2, color: colors.cColoredGroup2 },
             { phrases: sets.coloredGroup3, color: colors.cColoredGroup3 },
-            { phrases: sets.trackedTriggers, color: colors.cTracked },
-            { phrases: sets.grayedOut, color: colors.cGrayed },
+            { phrases: sets.trackedTriggers, color: colors.cTracked }
         ];
 
         logMessages.forEach(element => {
@@ -583,7 +587,7 @@ const SELECTORS = {
 
             const newBanButton = banButton.cloneNode(true);
 
-            newBanButton.href = "/rcon/bans?filter%5Borganization%5D=" + bmORG_ID + "&filter%5Bexpired%5D=true";
+            newBanButton.href = "/rcon/bans?filter%5Borganization%5D=" + BM_ORG_ID + "&filter%5Bexpired%5D=true";
             newBanButton.dataset.modified = 'true';
 
             banButton.parentNode.replaceChild(newBanButton, banButton);
@@ -621,19 +625,19 @@ const SELECTORS = {
 
     async function main() {
         log(1, `🚀 BMUS v${EXTENSION_VERSION}: Initializing...`);
-        const [customConfig, adminList] = await Promise.all([fetchJSON(SOURCES.customConfig, "Custom Config"), fetchJSON(SOURCES.adminList,
+        const [customConfig, adminList] = await Promise.all([fetchJSON(DATA_SOURCES.customConfig, "Custom Config"), fetchJSON(DATA_SOURCES.adminList,
             "Admin List")]);
         if (!customConfig) {
-            showVersionMismatchWarning(EXTENSION_VERSION, "Error", `Could not load required configuration from:\n${SOURCES.customConfig}`);
+            showVersionMismatchWarning(EXTENSION_VERSION, "Error", `Could not load required configuration from:\n${DATA_SOURCES.customConfig}`);
             return;
         }
         state.config = customConfig;
         const remoteVersion = state.config?.chrome_extension_version;
         if (!remoteVersion) {
-            showVersionMismatchWarning(EXTENSION_VERSION, "Unavailable", `Remote version is missing from config.\nURL: ${SOURCES.customConfig}`);
+            showVersionMismatchWarning(EXTENSION_VERSION, "Unavailable", `Remote version is missing from config.\nURL: ${DATA_SOURCES.customConfig}`);
         } else if (remoteVersion !== EXTENSION_VERSION) {
             showVersionMismatchWarning(EXTENSION_VERSION, remoteVersion,
-                `Your script version is mismatched or outdated. Please update.\nConfig URL: ${SOURCES.customConfig}`);
+                `Your script version is mismatched or outdated. Please update.\nConfig URL: ${DATA_SOURCES.customConfig}`);
         } else {
             log(1, `Extension version (${EXTENSION_VERSION}) is up to date.`);
         }

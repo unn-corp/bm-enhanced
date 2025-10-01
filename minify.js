@@ -1,7 +1,42 @@
 // Import necessary modules
 const fs = require('fs').promises;
 const path = require('path');
+const vm = require('vm');
+const { ESLint } = require('eslint');
 const terser = require('terser');
+
+function validateJavaScript(code, label, filePath = label) {
+  try {
+    new vm.Script(code, { filename: filePath });
+    console.log(`  - ✅ ${label} syntax check passed.`);
+  } catch (err) {
+    const error = new Error(`Syntax validation failed for ${label}: ${err.message}`);
+    error.cause = err;
+    throw error;
+  }
+}
+
+async function runLint() {
+  console.log('Task 0: Running ESLint...');
+  const eslint = new ESLint({
+    cwd: __dirname,
+  });
+  const results = await eslint.lintFiles(['src/**/*.js']);
+  const formatter = await eslint.loadFormatter('stylish');
+  const resultText = formatter.format(results);
+  if (resultText.trim().length > 0) {
+    console.log(resultText);
+  }
+
+  const hasWarnings = results.some(result => result.warningCount > 0);
+  const hasErrors = results.some(result => result.errorCount > 0);
+
+  if (hasErrors || hasWarnings) {
+    throw new Error('ESLint reported issues. Please fix the above warnings/errors.');
+  }
+
+  console.log('  - ✅ ESLint passed with no warnings.');
+}
 
 /**
  * 
@@ -23,8 +58,10 @@ async function runBuild() {
   };
 
   try {
-    console.log('🚀 Starting build process...');
-    console.log('--------------------------------------------------');
+  console.log('🚀 Starting build process...');
+  console.log('--------------------------------------------------');
+
+  await runLint();
 
     // --- 1. Read and minify the source code ---
     console.log('Task 1: Minifying source code...');
@@ -33,13 +70,22 @@ async function runBuild() {
     const originalSize = Buffer.byteLength(sourceCode, 'utf8');
     console.log(`  - Original size: ${originalSize} bytes`);
 
+    console.log('  - Running syntax check on source...');
+    validateJavaScript(sourceCode, 'Source script', paths.source);
+
     const result = await terser.minify(sourceCode, {
       compress: true,
       mangle: { toplevel: true },
     });
+    if (result.error) {
+      throw new Error(`Terser minification failed: ${result.error.message || result.error}`);
+    }
     const minifiedCode = result.code;
     const minifiedSize = Buffer.byteLength(minifiedCode, 'utf8');
     const reduction = (((originalSize - minifiedSize) / originalSize) * 100).toFixed(2);
+
+    console.log('  - Running syntax check on minified output...');
+    validateJavaScript(minifiedCode, 'Minified source');
 
     await fs.writeFile(paths.minifiedSource, minifiedCode);
     console.log(`  - Minified size: ${minifiedSize} bytes (Reduction: ${reduction}%)`);
@@ -65,11 +111,16 @@ async function runBuild() {
       .replace('//INJECT_MINIFIED_CODE_HERE', minifiedCode)
       .replace(/^\/\/ @version .*$/m, `// @version ${version}`);
 
-    await fs.writeFile(paths.tampermonkeyOutput, templateContent);
+  console.log('  - Running syntax check on Tampermonkey output...');
+  validateJavaScript(templateContent, 'Tampermonkey script', paths.tampermonkeyOutput);
+
+  await fs.writeFile(paths.tampermonkeyOutput, templateContent);
     console.log(`  - Tampermonkey script written to: ${paths.tampermonkeyOutput}`);
 
     // --- 4. Build the Chrome Extension script ---
     console.log('\nTask 4: Building Chrome Extension script...');
+  console.log('  - Running syntax check on Chrome extension output...');
+  validateJavaScript(minifiedCode, 'Chrome extension script', paths.chromeExtensionOutput);
     await fs.writeFile(paths.chromeExtensionOutput, minifiedCode);
     console.log(`  - Chrome Extension script written to: ${paths.chromeExtensionOutput}`);
 

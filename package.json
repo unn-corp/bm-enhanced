@@ -18,5 +18,9 @@
   "homepage": "https://github.com/Synarious/bm-enhanced#readme",
   "dependencies": {
     "terser": "^5.44.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "eslint": "^9.11.1"
   }
 }
