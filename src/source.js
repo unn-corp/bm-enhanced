@@ -1,5 +1,5 @@
 // Must match termList.json version
-const EXTENSION_VERSION = "4.0";
+const EXTENSION_VERSION = "4.1"; // Don't do any 0's as the minify will drop it.
 const BM_ORG_ID = 58064;
 
 const DATA_SOURCES = {
