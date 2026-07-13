@@ -1,9 +1,6 @@
 {
   "blacklist": [
-    "accerose",
-    "ghoti",
-    "gMg Cyslez",
-    "Logano Stefano",
-    "SE7EN"
+    "example_name_to_hide",
+    "in_battlemetrics_coloring"
   ]
 }
