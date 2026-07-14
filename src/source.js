@@ -16,12 +16,12 @@ function versionsEqual(a, b) {
 
 const SELECTORS = {
     logContainer: '.ReactVirtualized__Grid__innerScrollContainer',
-    logMessages: '[data-testid="activity-item"]',
-    logPlayerNames: 'a[href^="/rcon/players/"]',
-    logActivityNames: 'a[href^="/rcon/players/"]',
+    logMessages: '.css-12yx96v',
+    logPlayerNames: '.css-16howbp',
+    logActivityNames: '.css-16howbp',
     logNoteFlags: '.css-1e64wdl',
-    logServerNames: '[data-testid="activity-item"] span, [data-testid="activity-item"] a',
-    logTimestamps: 'time[datetime], [datetime]',
+    logServerNames: '.css-9svwgn span, .css-9svwgn a',
+    logTimestamps: 'time[datetime]',
     playerPage: "#RCONPlayerPage",
     playerPageTitle: "#RCONPlayerPage h2",
     playerInfoTable: '#RCONPlayerPage table',
@@ -254,34 +254,6 @@ const SELECTORS = {
         });
     }
 
-    let fallbackPatterns = null;
-
-    function getLogMessageElements() {
-        const items = document.querySelectorAll(SELECTORS.logMessages);
-        if (items.length) return items;
-
-        if (!fallbackPatterns && state.config) {
-            const seen = new Set();
-            fallbackPatterns = [];
-            const sets = state.config.sets;
-            for (const phrases of Object.values(sets)) {
-                for (const phrase of phrases) {
-                    if (phrase.length >= 8 && !seen.has(phrase)) {
-                        seen.add(phrase);
-                        fallbackPatterns.push(phrase);
-                    }
-                }
-            }
-        }
-        if (!fallbackPatterns?.length) return [];
-
-        return [...document.querySelectorAll('li, tr, article, [class]')]
-            .filter(el => {
-                const text = el.textContent?.trim() || '';
-                return fallbackPatterns.some(p => text.includes(p)) && text.length < 800;
-            });
-    }
-
     function styleLogMessages(logMessages, { sets, colors }) {
         const stylingRules = [
             { regex: /(?:\s|:|"|^)!admin/i, backgroundColor: '#9a000040', color: 'lime' },
@@ -298,7 +270,8 @@ const SELECTORS = {
         ];
 
         logMessages.forEach(element => {
-            if (element.dataset.styled) return;
+            const logLine = element.parentElement;
+            if (!logLine || logLine.dataset.styled) return;
 
             const textContent = element.textContent;
 
@@ -309,8 +282,8 @@ const SELECTORS = {
 
                 if (isMatch) {
                     if (rule.color) element.style.color = rule.color;
-                    if (rule.backgroundColor) element.style.backgroundColor = rule.backgroundColor;
-                    element.dataset.styled = 'true';
+                    if (rule.backgroundColor) logLine.style.backgroundColor = rule.backgroundColor;
+                    logLine.dataset.styled = 'true';
                     break;
                 }
             }
@@ -359,7 +332,7 @@ const SELECTORS = {
     function updateLogView() {
         if (!state.config) return;
 
-        const logMessages = getLogMessageElements();
+        const logMessages = document.querySelectorAll(SELECTORS.logMessages);
         const adminNameElements = document.querySelectorAll(`${SELECTORS.logActivityNames}, ${SELECTORS.logPlayerNames}`);
         const serverNameElements = document.querySelectorAll(SELECTORS.logServerNames);
         const noteFlagElements = document.querySelectorAll(SELECTORS.logNoteFlags);
@@ -383,13 +356,9 @@ const SELECTORS = {
                 el.getAttribute("aria-label") ||
                 el.closest("[title]")?.getAttribute("title") ||
                 el.closest("[aria-label]")?.getAttribute("aria-label") ||
-                el.parentElement?.getAttribute("title") ||
-                el.parentElement?.getAttribute("aria-label") ||
                 ""
             ).toLowerCase();
-            const parent = el.parentElement;
-            const siblingText = parent?.parentElement?.textContent?.toLowerCase() || "";
-            if ((label.includes("note") || label.includes("flag") || siblingText.includes("note") || siblingText.includes("flag")) && el.textContent.trim().length < 3) {
+            if ((label.includes("note") || label.includes("flag")) && el.textContent.trim().length < 3) {
                 el.style.color = colors.cNoteColorIcon;
             }
         });
