@@ -170,12 +170,12 @@ const SELECTORS = {
             .css-1xkypod {
                 position: unset !important;
             }
-            [data-testid="rcon-dashboard-server"] .css-1mrykm {
-                overflow: hidden;
+            .css-1mrykm {
+                overflow: hidden !important;
             }
-            [data-testid="rcon-dashboard-server"] .server-handle {
-                cursor: move;
-                z-index: 10;
+            .server-handle {
+                cursor: move !important;
+                z-index: 10 !important;
             }
             .css-mxzvlz {
                 padding-left: 0.5em;
@@ -350,15 +350,7 @@ const SELECTORS = {
         });
 
         noteFlagElements.forEach(el => {
-            if (el.style.color) return;
-            const label = (
-                el.getAttribute("title") ||
-                el.getAttribute("aria-label") ||
-                el.closest("[title]")?.getAttribute("title") ||
-                el.closest("[aria-label]")?.getAttribute("aria-label") ||
-                ""
-            ).toLowerCase();
-            if ((label.includes("note") || label.includes("flag")) && el.textContent.trim().length < 3) {
+            if (!el.style.color) {
                 el.style.color = colors.cNoteColorIcon;
             }
         });
@@ -529,6 +521,21 @@ const SELECTORS = {
         }
 
         if (isLogView()) updateLogView();
+
+        document.querySelectorAll('.css-1mrykm').forEach(el => {
+            if (!el.dataset.overflowFixed) {
+                el.style.overflow = 'hidden';
+                el.dataset.overflowFixed = 'true';
+            }
+        });
+
+        document.querySelectorAll('.server-handle').forEach(el => {
+            if (!el.dataset.handleFixed) {
+                el.style.cursor = 'move';
+                el.style.zIndex = '10';
+                el.dataset.handleFixed = 'true';
+            }
+        });
         
         if (document.querySelector(SELECTORS.orgEditPage)) updateOrgEditPage();
         else state.page.isOrgEditPage = false;
