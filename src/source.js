@@ -51,8 +51,7 @@ const SELECTORS = {
             isLogView: false,
             isOrgEditPage: false
         },
-        cachedColorMap: new Map(),
-        stylingRules: []
+        cachedColorMap: new Map()
     };
 
     function log(level, ...args) {
@@ -255,30 +254,36 @@ const SELECTORS = {
         });
     }
 
+    let fallbackPatterns = null;
+
     function getLogMessageElements() {
         const items = document.querySelectorAll(SELECTORS.logMessages);
         if (items.length) return items;
 
-        const logContainer = document.querySelector(SELECTORS.logContainer);
-        if (!logContainer) return [];
+        if (!fallbackPatterns && state.config) {
+            const seen = new Set();
+            fallbackPatterns = [];
+            const sets = state.config.sets;
+            for (const phrases of Object.values(sets)) {
+                for (const phrase of phrases) {
+                    if (phrase.length >= 8 && !seen.has(phrase)) {
+                        seen.add(phrase);
+                        fallbackPatterns.push(phrase);
+                    }
+                }
+            }
+        }
+        if (!fallbackPatterns?.length) return [];
 
-        const logPatterns = [
-            'was kicked', 'was warned', 'was banned',
-            'joined the server', 'left the server', 'team killed',
-            'requested', 'changed the map', 'set the next map',
-            'restarted the match', 'Trigger added flag'
-        ];
-
-        return [...logContainer.querySelectorAll('li, tr, article')]
+        return [...document.querySelectorAll('li, tr, article, [class]')]
             .filter(el => {
                 const text = el.textContent?.trim() || '';
-                return logPatterns.some(p => text.includes(p)) && text.length < 800;
+                return fallbackPatterns.some(p => text.includes(p)) && text.length < 800;
             });
     }
 
-    function buildStylingRules(config) {
-        const { sets, colors } = config;
-        return [
+    function styleLogMessages(logMessages, { sets, colors }) {
+        const stylingRules = [
             { regex: /(?:\s|:|"|^)!admin/i, backgroundColor: '#9a000040', color: 'lime' },
             { phrases: sets.grayedOut, color: colors.cGrayed },
             { phrases: sets.teamKilled, color: colors.cTeamKilled, backgroundColor: '#292135' },
@@ -291,9 +296,7 @@ const SELECTORS = {
             { phrases: sets.coloredGroup3, color: colors.cColoredGroup3 },
             { phrases: sets.trackedTriggers, color: colors.cTracked }
         ];
-    }
 
-    function styleLogMessages(logMessages, stylingRules) {
         logMessages.forEach(element => {
             if (element.dataset.styled) return;
 
@@ -328,7 +331,6 @@ const SELECTORS = {
         return colorMap;
     }
 
-    // Handles admin names with/without prefixes by stripping prefixes before lookup
     function styleAdminNames(adminNameElements) {
         if (state.cachedColorMap.size === 0) return;
         const prefixes = state.config.namePrefixes || [];
@@ -362,7 +364,7 @@ const SELECTORS = {
         const serverNameElements = document.querySelectorAll(SELECTORS.logServerNames);
         const noteFlagElements = document.querySelectorAll(SELECTORS.logNoteFlags);
 
-        styleLogMessages(logMessages, state.stylingRules);
+        styleLogMessages(logMessages, state.config);
         styleAdminNames(adminNameElements);
 
         const { serverName1, serverName2, colors } = state.config;
@@ -512,7 +514,6 @@ const SELECTORS = {
         }
     }
 
-    // Adds ||| separators for ./docs/ generator compatibility
     function updateOrgEditPage() {
         if (!state.page.isOrgEditPage) state.page.isOrgEditPage = true;
         document.querySelectorAll(SELECTORS.orgRoleList).forEach(li => {
@@ -523,7 +524,6 @@ const SELECTORS = {
         });
     }
 
-    // Redirects ban button to filter by org's global ban list
     function setupBanButton() {
         const banButton = document.querySelector(SELECTORS.banButton);
         if (!banButton || banButton.dataset.modified) return;
@@ -540,26 +540,12 @@ const SELECTORS = {
     }
 
     let observerScheduled = false;
-    let lastUpdateTime = 0;
-    const THROTTLE_MS = 100;
 
     function scheduleUpdate() {
         if (observerScheduled) return;
-        const now = Date.now();
-        const timeSinceLastUpdate = now - lastUpdateTime;
-        if (timeSinceLastUpdate < THROTTLE_MS) {
-            observerScheduled = true;
-            window.setTimeout(() => {
-                observerScheduled = false;
-                lastUpdateTime = Date.now();
-                processDOMChanges();
-            }, THROTTLE_MS - timeSinceLastUpdate);
-            return;
-        }
         observerScheduled = true;
         window.requestAnimationFrame(() => {
             observerScheduled = false;
-            lastUpdateTime = Date.now();
             processDOMChanges();
         });
     }
@@ -567,7 +553,7 @@ const SELECTORS = {
     function processDOMChanges() {
         const onPlayerPage = document.querySelector(SELECTORS.playerPage);
         if (onPlayerPage) {
-            setupPlayerPage().catch(err => console.error('BMUS: setupPlayerPage error', err));
+            setupPlayerPage();
         } else if (state.page.isPlayerPage) {
             document.querySelector(SELECTORS.actionsContainer)?.remove();
             state.page.isPlayerPage = false;
@@ -611,7 +597,6 @@ const SELECTORS = {
             state.adminLists.group3 = new Set(adminList.group3);
         }
         state.cachedColorMap = buildAdminColorMap(state.config);
-        state.stylingRules = buildStylingRules(state.config);
 
         injectGlobalCSS();
         new MutationObserver(scheduleUpdate).observe(document.body, { childList: true, subtree: true });
