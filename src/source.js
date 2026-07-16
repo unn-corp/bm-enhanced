@@ -17,7 +17,7 @@ function versionsEqual(a, b) {
 const SELECTORS = {
     logContainer: '.ReactVirtualized__Grid__innerScrollContainer',
     logMessages: '.css-12yx96v',
-    logPlayerNames: '.css-16howbp',
+    logPlayerNames: '.name a',
     logActivityNames: '.css-16howbp',
     logNoteFlags: '.css-1e64wdl',
     logServerNames: '.css-9svwgn span, .css-9svwgn a',
@@ -159,6 +159,9 @@ const SELECTORS = {
                 width: 90% !important;
                 margin-left: 4em;
                 margin-right: 4em;
+            }
+            .css-1e64wdl {
+                color: rgb(255 255 255) !important;
             }
             @media (max-width: 768px) {
                 .main {
