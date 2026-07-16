@@ -1,5 +1,5 @@
 {
-  "version": "4.0",
+  "version": "4.1",
   "orgId": 58064,
   "dataSources": {
     "adminList": "https://raw.githubusercontent.com/unn-corp/bm-enhanced/refs/heads/main/src/config/adminList.json",
