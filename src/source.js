@@ -123,6 +123,7 @@ const SELECTORS = {
     function injectGlobalCSS() {
         if (document.getElementById('bmus-global-styles')) return;
         const styles = `
+          /* This area handles copy button and CBL lookup at player profile e.g  https://www.battlemetrics.com/rcon/players/137922013 */
             #bmus-actions-container {
                 position: absolute;
                 top: 14.35em;
@@ -155,30 +156,32 @@ const SELECTORS = {
             #CBL-info-container:hover {
                 filter:  brightness(1.2);
             }
+            
+    /* This area handles movable elements and server bars found at https://www.battlemetrics.com/rcon */
+            .css-1e8vu3u .server-handle {
+                cursor: move;
+                z-index: 10 !important;
+            } 
+
+    /* Other styling */
             .main {
                 width: 90% !important;
                 margin-left: 4em;
                 margin-right: 4em;
             }
-            .css-1e64wdl {
-                color: rgb(255 255 255) !important;
-            }
             @media (max-width: 768px) {
                 .main {
                 width: inherit !important;
-            }
-            }.css-1nxi32t {
+            }}
+                
+    /* Changes note color icon from dull grey to bright white in player list view. */
+
+     /* Other styling */           
+            .css-1nxi32t {
                 width: 1px;
             }
             .css-1xkypod {
                 position: unset !important;
-            }
-            [data-testid="rcon-dashboard-server"] .css-1mrykm {
-                overflow: hidden;
-            }
-            [data-testid="rcon-dashboard-server"] .server-handle {
-                cursor: move;
-                z-index: 10;
             }
             .css-mxzvlz {
                 padding-left: 0.5em;
@@ -332,6 +335,33 @@ const SELECTORS = {
         });
     }
 
+    function styleSquadLeaders() {
+        const playerNames = document.querySelectorAll(SELECTORS.logPlayerNames);
+        playerNames.forEach(el => {
+            const nameContainer = el.closest('.name');
+            if (!nameContainer) return;
+            const detail = nameContainer.querySelector('.player-detail .small.text-muted');
+            if (detail && detail.textContent.trim() === 'Squad Leader') {
+                const row = el.closest('[role="row"]');
+                if (row) {
+                    const btn = row.querySelector('.commands button');
+                    if (btn) {
+                        btn.style.background = 'rgb(237, 200, 0)';
+                        btn.style.color = '#020202';
+                    }
+                }
+                const name = el.textContent.trim();
+                if (!state.cachedColorMap.has(name)) {
+                    const prefixes = state.config.namePrefixes || [];
+                    const isAdmin = prefixes.some(p => name.startsWith(p) && state.cachedColorMap.has(name.substring(p.length).trim()));
+                    if (!isAdmin) {
+                        el.style.color = '#ffd900';
+                    }
+                }
+            }
+        });
+    }
+
     function updateLogView() {
         if (!state.config) return;
 
@@ -342,6 +372,7 @@ const SELECTORS = {
 
         styleLogMessages(logMessages, state.config);
         styleAdminNames(adminNameElements);
+        styleSquadLeaders();
 
         const { serverName1, serverName2, colors } = state.config;
         serverNameElements.forEach(el => {
@@ -353,6 +384,10 @@ const SELECTORS = {
         });
 
         noteFlagElements.forEach(el => {
+            if (el.classList.contains('glyphicon-comment')) {
+                el.style.color = 'rgb(255, 255, 255)';
+                return;
+            }
             if (el.style.color) return;
             const label = (
                 el.getAttribute("title") ||
@@ -571,7 +606,7 @@ const SELECTORS = {
         state.cachedColorMap = buildAdminColorMap(state.config);
 
         injectGlobalCSS();
-        new MutationObserver(scheduleUpdate).observe(document.body, { childList: true, subtree: true });
+        new MutationObserver(scheduleUpdate).observe(document.body, { childList: true, subtree: true, characterData: true });
         processDOMChanges();
         log(1, "👀 Observer active.");
     }
