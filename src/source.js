@@ -21,6 +21,7 @@ const SELECTORS = {
     logActivityNames: '.css-16howbp',
     logNoteFlags: '.css-1e64wdl',
     logServerNames: '.css-9svwgn span, .css-9svwgn a',
+    serverNameDisplays: '.server-name a, td.byOn span[title]',
     logTimestamps: 'time[datetime]',
     playerPage: "#RCONPlayerPage",
     playerPageTitle: "#RCONPlayerPage h2",
@@ -260,6 +261,19 @@ const SELECTORS = {
         });
     }
 
+    // Returns the configured color of the first matching server name (longest name wins), or null.
+    function serverColorFor(text) {
+        const { serverName1, serverName2, colors } = state.config;
+        const entries = [
+            { name: serverName1, color: colors.cServerName1 || '#39FF14' },
+            { name: serverName2, color: colors.cServerName2 || '#FFFF00' }
+        ].filter(entry => entry.name).sort((a, b) => b.name.length - a.name.length);
+        for (const entry of entries) {
+            if (text.includes(entry.name)) return entry.color;
+        }
+        return null;
+    }
+
     function styleLogMessages(logMessages, { sets, colors }) {
         const stylingRules = [
             { regex: /(?:\s|:|"|^)!admin/i, backgroundColor: '#9a000040', color: 'lime' },
@@ -378,6 +392,7 @@ const SELECTORS = {
         const logMessages = document.querySelectorAll(SELECTORS.logMessages);
         const adminNameElements = document.querySelectorAll(`${SELECTORS.logActivityNames}, ${SELECTORS.logPlayerNames}`);
         const serverNameElements = document.querySelectorAll(SELECTORS.logServerNames);
+        const serverNameDisplays = document.querySelectorAll(SELECTORS.serverNameDisplays);
         const noteFlagElements = document.querySelectorAll(SELECTORS.logNoteFlags);
 
         styleLogMessages(logMessages, state.config);
@@ -391,6 +406,15 @@ const SELECTORS = {
             if (text.includes(serverName1)) el.style.color = "green";
             else if (text.includes(serverName2)) el.style.color = "yellow";
             el.dataset.colored = 'true';
+        });
+
+        serverNameDisplays.forEach(el => {
+            if (el.dataset.colored) return;
+            const color = serverColorFor(el.textContent);
+            if (color) {
+                el.style.color = color;
+                el.dataset.colored = 'true';
+            }
         });
 
         noteFlagElements.forEach(el => {
