@@ -27,7 +27,7 @@ const SELECTORS = {
     playerInfoTable: '#RCONPlayerPage table',
     orgEditPage: '#RCONOrgEditPage',
     orgRoleList: '#RCONOrgEditPage ul.list-unstyled > li',
-    banButton: 'a[href="/rcon/bans"]',
+    banButton: '#RCONLayout nav a[href^="/rcon/bans"]',
     cornerButtonContainer: "#corner-button-container",
     actionsContainer: "#bmus-actions-container",
     copyInfoButton: "#copy-player-info-btn",
@@ -542,13 +542,33 @@ const SELECTORS = {
     }
 
     function setupBanButton() {
-        const banButton = document.querySelector(SELECTORS.banButton);
-        if (!banButton || banButton.dataset.modified) return;
+        const targetHref = `/rcon/bans?filter%5Borganization%5D=${BM_ORG_ID}&filter%5Bexpired%5D=true`;
+        const nav = document.querySelector('#RCONLayout nav');
+        if (!nav) return;
 
-        const newBtn = banButton.cloneNode(true);
-        newBtn.href = `/rcon/bans?filter%5Borganization%5D=${BM_ORG_ID}&filter%5Bexpired%5D=true`;
-        newBtn.dataset.modified = 'true';
-        banButton.parentNode.replaceChild(newBtn, banButton);
+        if (!nav.dataset.bmusBanIntercept) {
+            nav.dataset.bmusBanIntercept = 'true';
+            nav.addEventListener('click', (event) => {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                const link = event.target?.closest?.('a[href^="/rcon/bans"]');
+                if (!link || !nav.contains(link)) return;
+                if (link.getAttribute('href') !== targetHref) link.setAttribute('href', targetHref);
+                event.preventDefault();
+                event.stopPropagation();
+                const query = decodeURIComponent(window.location.search);
+                const alreadyThere = window.location.pathname === '/rcon/bans'
+                    && query.includes(`filter[organization]=${BM_ORG_ID}`)
+                    && query.includes('filter[expired]=true');
+                if (!alreadyThere) window.location.assign(targetHref);
+            });
+        }
+
+        nav.querySelectorAll('a[href^="/rcon/bans"]').forEach((banButton) => {
+            if (banButton.getAttribute('href') !== targetHref) {
+                banButton.setAttribute('href', targetHref);
+            }
+            if (!banButton.dataset.modified) banButton.dataset.modified = 'true';
+        });
     }
 
     function isLogView() {
