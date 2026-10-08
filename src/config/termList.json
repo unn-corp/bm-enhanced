@@ -149,8 +149,8 @@
     "cJoined": "#919191",
     "cGrayed": "#919191",
     "cTracked": "#FF931A",
-    "cServerName1": "#39FF14",
-    "cServerName2": "#FFFF00",
+    "cServerName1": "#4ed400",
+    "cServerName2": "#ffae07",
     "cNoteColorIcon": "#f5ccff"
   }
 }
