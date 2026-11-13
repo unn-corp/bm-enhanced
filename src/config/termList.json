@@ -1,12 +1,13 @@
 {
-  "version": "4.3",
-  "chrome_extension_version": "4.3",
+  "version": "5.0",
+  "chrome_extension_version": "5.0",
   "updateRate": "65",
   "bmORG_ID": "58064",
   "serverName1": "The Unnamed -",
   "serverName2": "Unnamed #1 |",
   "namePrefixes": [
     "Uɴɴ.",
+    "UNNA",
     "Uɴɴ.x",
     "Uɴɴ.xᴏ.",
     "Uɴɴ.⚒.",
@@ -72,7 +73,12 @@
       "Be sure to leave a tip for that peep",
       "(You have entered this",
       "Server Population: ",
-      "Ban Log: "
+      "Ban Log: ",
+      "Requesting backup",
+      "Requesting healing",
+      "ammo at X",
+      "supplies at X",
+      "Requesting pickup X"
     ],
     "trackedTriggers": [
       "[SL Kit]"
@@ -129,7 +135,6 @@
       "changed the map to",
       "requested the next map.",
       "AdminRenameSquad",
-      "(Global)",
       "executed Player Action ⚠️",
       "Teleported to",
       "(Squad Name: Admin"
