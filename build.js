@@ -156,8 +156,11 @@ async function runBuild() {
     console.log(`  - Reading source template from: ${paths.source}`);
     let sourceCode = await fs.readFile(paths.source, 'utf8');
 
+    if (!sourceCode.includes('"__VERSION__"')) {
+      throw new Error('src/source.js is missing the "__VERSION__" build placeholder');
+    }
     sourceCode = sourceCode
-      .replace('"__VERSION__"', `"${customization.version}"`)
+      .replace('"__VERSION__"', JSON.stringify(version))
       .replace('"__ORG_ID__"', customization.orgId)
       .replace('"__DATA_SOURCES__"', () => JSON.stringify(customization.dataSources))
       .replace('"__DEFAULT_TERMS__"', () => JSON.stringify(require('./src/config/termList.json')))
@@ -205,7 +208,7 @@ async function runBuild() {
     templateContent = templateContent
       .replace(/^\/\/ @name .*$/m, `// @name ${tm.name}`)
       .replace(/^\/\/ @namespace .*$/m, `// @namespace ${tm.namespace}`)
-      .replace(/^\/\/ @version .*$/m, `// @version ${customization.version}`)
+      .replace(/^\/\/ @version .*$/m, `// @version ${version}`)
       .replace(/^\/\/ @updateURL .*$/m, `// @updateURL ${tm.updateURL}`)
       .replace(/^\/\/ @downloadURL .*$/m, `// @downloadURL ${tm.downloadURL}`)
       .replace(/^\/\/ @description .*$/m, `// @description ${tm.description}`)
@@ -221,14 +224,15 @@ async function runBuild() {
 
     // --- Build Chrome Extension script ---
     console.log('\nTask 5: Building Chrome Extension script...');
+    const chromeContent = `// BattleMetrics Enhanced v${version}\n${minifiedCode}\n`;
     console.log('  - Running syntax check on Chrome extension output...');
-    validateJavaScript(minifiedCode, 'Chrome extension script', paths.chromeExtensionOutput);
-    await fs.writeFile(paths.chromeExtensionOutput, minifiedCode);
+    validateJavaScript(chromeContent, 'Chrome extension script', paths.chromeExtensionOutput);
+    await fs.writeFile(paths.chromeExtensionOutput, chromeContent);
     const worker = (await fs.readFile(paths.chromeWorkerTemplate, 'utf8'))
       .replace('"__DATA_SOURCES__"', () => JSON.stringify(customization.dataSources));
     validateJavaScript(worker, 'Chrome request worker', paths.chromeWorkerOutput);
     await fs.writeFile(paths.chromeWorkerOutput, worker);
-    console.log(`  - Chrome Extension script written to: ${paths.chromeExtensionOutput}`);
+    console.log(`  - Chrome Extension script v${version} written to: ${paths.chromeExtensionOutput}`);
 
     // --- Update Chrome Extension manifest ---
     console.log('\nTask 6: Updating Chrome Extension manifest...');
