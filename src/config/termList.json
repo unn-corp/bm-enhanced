@@ -7,7 +7,10 @@
   "serverName2": "Unnamed #1 |",
   "namePrefixes": [
     "Uɴɴ.",
-    "UNNA",
+    "[UNNA]",
+    "[UNN]",
+    "[UNN.] ",
+    "[Unn.] ",
     "Uɴɴ.x",
     "Uɴɴ.xᴏ.",
     "Uɴɴ.⚒.",
@@ -40,8 +43,6 @@
     "RAT |",
     "((DS))",
     "((DS)) ",
-    "[UNN.] ",
-    "[Unn.] ",
     "[DS] ",
     "[(DS)] ",
     "[((DS))] "
